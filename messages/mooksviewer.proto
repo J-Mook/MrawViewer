@@ -1,0 +1,46 @@
+syntax = "proto3";
+package mooksviewer;
+
+// [RINF:DART-SIGNAL]
+message InputMessage {
+  string cmd = 1;
+  int32 intRData = 2;
+  int32 intGData = 3;
+  int32 intBData = 4;
+  int32 intData = 5;
+}
+
+// [RINF:DART-SIGNAL]
+message MessageOpenFile {
+  string filepath = 1;
+  uint32 Height = 2;
+  uint32 Width = 3;
+  int32 Byte = 4;
+  int32 Head = 5;
+  int32 Tail = 6;
+}
+
+// [RINF:DART-SIGNAL]
+message MessagePlayControl {
+  string cmd = 1;
+}
+
+// [RINF:RUST-SIGNAL]
+message MessageRaw {
+  uint32 Height = 1;
+  uint32 Width = 2;
+}
+
+// [RINF:RUST-SIGNAL]
+message OutputMessage {
+  int32 current_number = 1;
+  uint32 Data = 2;
+}
+
+// [RINF:RUST-SIGNAL]
+message OutputImage {
+  int32 data = 1;
+  int32 rdata = 2;
+  int32 gdata = 3;
+  int32 bdata = 4;
+}
