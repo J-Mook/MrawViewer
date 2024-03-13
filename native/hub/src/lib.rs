@@ -1,5 +1,9 @@
-use std::{os::windows::thread, sync::{Arc, Mutex}, time::Duration};
+#[cfg(target_os = "windows")]
+use std::os::windows::thread;
+#[cfg(target_os = "macos")]
+use std::os::unix::thread;
 
+use std::{sync::{Arc, Mutex}, time::Duration};
 use tokio_with_wasm::tokio;
 use image::ImageEncoder;
 
@@ -145,12 +149,12 @@ pub async fn stream_mraw_image(){
 
     // let t_handler = std::thread::spawn( move || {
     //     loop {
-
+    
     //         let mut state = a_playstate4.lock().unwrap();
     //         let info = a_mrawinfo4.lock().unwrap();
     //         let _wid = info.width.clone();
     //         let _hit = info.height.clone();
-
+            
     //         if _wid != 0 && _hit != 0 {
     //             MessageRaw {
     //                 height: _hit,
@@ -162,12 +166,12 @@ pub async fn stream_mraw_image(){
     //             if state.current_idx < 0 { state.current_idx = 0; }
 
     //             println!("{}/{} w{} h{}", state.current_idx, state.total_idx, _wid, _hit);
-                
+
     //             std::thread::sleep(Duration::from_millis(10));
     //         }
     //     }
     // });
-    // t_handler.join().unwrap();
+// t_handler.join().unwrap();
 
 
     tokio::spawn(async move {
@@ -281,7 +285,9 @@ fn make_test_pattern(width: u32, height: u32) -> Option<Vec<Vec<u16>>>{
     for vvv in 0..256 {
         for yyy in 0..height {
             for xxx in 0..width {
-                image_data[vvv as usize][((width * yyy + xxx)) as usize] = vvv;
+                let mut pix = vvv;
+                pix = (256 * xxx / width + vvv) % 256;
+                image_data[vvv as usize][((width * yyy + xxx)) as usize] = (pix * 64) as u16;
             }
         }
     }
@@ -408,7 +414,7 @@ pub async fn stream_rgb_image() {
                 rdata: s.cur_r_num,
                 gdata: s.cur_g_num,
                 bdata: s.cur_b_num,
-            }.send_signal_to_dart(Some(draw_image(s.cur_r_num, s.cur_g_num, s.cur_b_num, HEIGHT, WIDTH).unwrap()));
+            }.send_signal_to_dart(draw_image(s.cur_r_num, s.cur_g_num, s.cur_b_num, HEIGHT, WIDTH));
 
         }
     });
