@@ -3,13 +3,17 @@ use std::os::windows::thread;
 #[cfg(target_os = "macos")]
 use std::os::unix::thread;
 
-use std::{sync::{Arc, Mutex}, time::Duration};
+use std::sync::{Arc, Mutex};
 use tokio_with_wasm::tokio;
 use image::ImageEncoder;
+use std::fs::File;
 
-const WIDTH: u32 = 256;
-const HEIGHT: u32 = 256;
-const BUF_SIZE: u32 = WIDTH * HEIGHT * 3;
+use std::time::{Duration, Instant};
+
+
+// const WIDTH: u32 = 256;
+// const HEIGHT: u32 = 256;
+// const BUF_SIZE: u32 = WIDTH * HEIGHT * 3;
 
 const SHOULD_DEMONSTRATE: bool = true;
 
@@ -34,7 +38,6 @@ async fn main() {
 pub async fn stream_mraw_image(){
 
     use messages::mooksviewer::*;
-    use std::fs::File;
     use std::io::{self, BufReader, Read};
     use std::path::Path;
     use byteorder::{LittleEndian, ReadBytesExt};
@@ -47,7 +50,7 @@ pub async fn stream_mraw_image(){
         byte: i32,
         head: i32,
         tail: i32,
-        framedata: Vec<Vec<u16>>
+        framedata: Arc<Vec<Vec<u16>>>
     }
     let a_mrawinfo = Arc::new(Mutex::new(s_mrawinfo {
         filepath: "".to_string(),
@@ -56,7 +59,7 @@ pub async fn stream_mraw_image(){
         byte: 0,
         head: 0,
         tail: 0,
-        framedata: Vec::new()
+        framedata: Arc::new(Vec::new()),
     }));
     
     #[derive(Clone)]
@@ -87,7 +90,6 @@ pub async fn stream_mraw_image(){
             let mut info = a_mrawinfo.lock().unwrap();
             
             let msg = dart_signal.message;
-            let fp = msg.filepath.clone();
             info.filepath = msg.filepath;
             info.height = msg.height;
             info.width = msg.width;
@@ -95,15 +97,13 @@ pub async fn stream_mraw_image(){
             info.head = msg.head;
             info.tail = msg.tail;
             
-            if let Ok(file) = File::open(info.filepath.clone()) {
-                if let Some(data) = load_image_file(info.filepath.clone(), info.height, info.width) {
-                    info.framedata = data.clone();
-                    state.total_idx = data.len() as u32;
-                    state.opened = true;
-                }
+            if let Some(data) = load_image_file(info.filepath.clone(), info.height, info.width) {
+                state.total_idx = data.len() as u32;
+                info.framedata = Arc::new(data);
+                state.opened = true;
             } else {
                 state.opened = false;
-                info.framedata = make_test_pattern(info.height, info.width).unwrap();
+                info.framedata = Arc::new(make_test_pattern(info.height, info.width).unwrap());
                 state.total_idx = 256;
             }
             
@@ -126,143 +126,96 @@ pub async fn stream_mraw_image(){
             if _cmd == "Play" {
                 state.play = true;
             }
-            if _cmd == "Puase" {
+            if _cmd == "Pause" {
                 state.play = false;
             }
             if _cmd == "Stop" {
                 state.current_idx = 0;
                 state.play = false;
             }
+            if _cmd == "Jump" {
+                state.current_idx = msg.data as u32;
+            }
             if _cmd == "Close" {
-                state.current_idx = 0;
-                state.total_idx = 0;
-                state.play = false;
-                state.opened = false;
-                info.framedata.clear();
-                // info.filepath = "";
+                info.filepath = "".to_string();
                 info.height = 0;
                 info.width = 0;
+                info.byte = 0;
+                info.head = 0;
+                info.tail = 0;
+                info.framedata = Arc::new(Vec::new());
+
+                state.opened = false;
+                state.play = false;
+                state.current_idx = 0;
+                state.total_idx = 0;
             }
             println!("recv cmd : {}", _cmd);
         }
     });
 
-    // let t_handler = std::thread::spawn( move || {
-    //     loop {
-    
-    //         let mut state = a_playstate4.lock().unwrap();
-    //         let info = a_mrawinfo4.lock().unwrap();
-    //         let _wid = info.width.clone();
-    //         let _hit = info.height.clone();
-            
-    //         if _wid != 0 && _hit != 0 {
-    //             MessageRaw {
-    //                 height: _hit,
-    //                 width: _wid
-    //             }.send_signal_to_dart(load_frame(info.framedata.clone(), info.width, info.height, state.current_idx));
-                
-    //             if state.play { state.current_idx += 1; }
-    //             if state.current_idx >= state.total_idx { state.current_idx = 0; }
-    //             if state.current_idx < 0 { state.current_idx = 0; }
-
-    //             println!("{}/{} w{} h{}", state.current_idx, state.total_idx, _wid, _hit);
-
-    //             std::thread::sleep(Duration::from_millis(10));
-    //         }
-    //     }
-    // });
-// t_handler.join().unwrap();
-
-
-    tokio::spawn(async move {
+    std::thread::spawn( move || {
         loop {
-            tokio::time::sleep(std::time::Duration::from_millis(2)).await;
-
-            let mut state = a_playstate2.lock().unwrap();
-            let info = a_mrawinfo2.lock().unwrap();
-            let _wid = info.width.clone();
-            let _hit = info.height.clone();
             
-            if _wid != 0 && _hit != 0 {
-                MessageRaw {
-                    height: _hit,
-                    width: _wid
-                }.send_signal_to_dart(load_frame(info.framedata.clone(), info.width, info.height, state.current_idx));
+            let info: std::sync::MutexGuard<'_, s_mrawinfo> = a_mrawinfo4.lock().unwrap();
+            let framedata_arc_clone = Arc::clone(&info.framedata);
+            let _width = info.width.clone();
+            let _height = info.height.clone();
+            drop(info);
+            
+            if _width != 0 && _height != 0 {
+                let start = Instant::now();
                 
-                if state.play { state.current_idx += 1; }
-                if state.current_idx >= state.total_idx { state.current_idx = 0; }
-                if state.current_idx < 0 { state.current_idx = 0; }
+                let state: std::sync::MutexGuard<'_, s_playstate> = a_playstate4.lock().unwrap();
+                let mut _state = state.clone();
+                drop(state);
+                
+                let frameimage = load_frame(&framedata_arc_clone, _width, _height, _state.current_idx);
 
-                println!("{}/{} w{} h{}", state.current_idx, state.total_idx, _wid, _hit);
+                let sss = start.elapsed().as_millis() as u64;
+                if (sss < 33) { std::thread::sleep(Duration::from_millis(33 - sss)); }
+
+                MessageRaw { 
+                    height: _height,
+                    width: _width,
+                    curidx: _state.current_idx,
+                    endidx: _state.total_idx,
+                    fps: sss ,
+                }.send_signal_to_dart(frameimage);
+                
+                if _state.play {
+                    _state.current_idx += 1;
+                    if _state.current_idx >= _state.total_idx { _state.current_idx = 0; }
+                    
+                    let mut state = a_playstate4.lock().unwrap();
+                    state.current_idx = _state.current_idx;
+                    drop(state);
+                }
+                
+                // println!("{}/{} w{} h{} {}ms", _state.current_idx, _state.total_idx, _width, _height, start.elapsed().as_millis());
+            }
+            else{
+                std::thread::sleep(Duration::from_millis(10));
             }
         }
     });
-
-    // let (sender, mut receiver) = tokio::sync::mpsc::channel(5);
-    // tokio::spawn(async move {
-    //     loop {
-    //         tokio::time::sleep(std::time::Duration::from_millis(10)).await;
-                
-    //         if sender.capacity() == 0 {
-    //             continue;
-    //         }
-
-    //         let _wid;
-    //         let _hit: u32;
-    //         let frame;
-    //         {
-    //             let mut state = a_playstate2.lock().unwrap();
-    //             let info = a_mrawinfo2.lock().unwrap();
-
-    //             _wid = info.width.clone();
-    //             _hit = info.height.clone();
-    //             frame = load_frame(info.framedata.clone(), info.width, info.height, state.current_idx);
-
-    //             if state.play { state.current_idx += 1; }
-    //             if state.current_idx >= state.total_idx { state.current_idx = 0; }
-    //             if state.current_idx < 0 { state.current_idx = 0; }
-    //             println!("{}/{} w{} h{}", state.current_idx, state.total_idx, _wid, _hit);
-    //         }
-
-    //         if _wid != 0 && _hit != 0 {
-    //             let join_handle = tokio::task::spawn_blocking(move || {
-    //                 return (_wid, _hit, frame)
-    //             });
-    //             let _ = sender.send(join_handle).await;
-    //         }
-    //     }
-    // });
-
-    // tokio::spawn(async move {
-    //     loop {
-    //         if let Some(join_handle) = receiver.recv().await {
-    //             let received_frame = join_handle.await.unwrap();
-    //             if let (_wid, _hit, Some(image)) = received_frame {
-    //                 // Stream the image data to Dart.
-    //                 MessageRaw {
-    //                     height: _hit,
-    //                     width: _wid
-    //                 }.send_signal_to_dart(Some(image));
-    //                 // println!("Send!!! w{} h{}",  _wid, _hit);
-    //             };
-    //         }
-    //     }
-    // });
 }
 
 fn load_image_file(filepath: String, width: u32, height: u32) -> Option<Vec<Vec<u16>>>{
-    let mut image_data: Vec<Vec<u16>> = [].to_vec();
+    let mut image_data: Vec<Vec<u16>> = Vec::new();
     let frame_size = (width * height) as usize;
 
-    let bytes: Vec<u8> = std::fs::read(filepath).unwrap();
+    if let Ok(file) = File::open(filepath.clone()) {
+
+        let bytes: Vec<u8> = std::fs::read(filepath).unwrap();
         let mut frame: Vec<u16> = Vec::with_capacity(frame_size);
         let mut idx = 0;
-
+    
         for byte_pair in bytes.chunks_exact(2) {
             // let short = u16::from_le_bytes([byte_pair[0], byte_pair[1]]);
             let short = ((byte_pair[1] as u16) << 8) | byte_pair[0] as u16;
             frame.push(short);
-
+    
             if frame.len() == frame_size {
                 image_data.push(frame);
                 frame = Vec::with_capacity(frame_size);
@@ -272,11 +225,12 @@ fn load_image_file(filepath: String, width: u32, height: u32) -> Option<Vec<Vec<
         if !frame.is_empty() {
             image_data.push(frame);
         }
-        
-        match image_data.is_empty() {
-            true => Some(image_data),
-            false => None,
-        }
+    }
+
+    match !image_data.is_empty() {
+        true => Some(image_data),
+        false => None,
+    }
 }
 
 fn make_test_pattern(width: u32, height: u32) -> Option<Vec<Vec<u16>>>{
@@ -294,10 +248,10 @@ fn make_test_pattern(width: u32, height: u32) -> Option<Vec<Vec<u16>>>{
     return Some(image_data);
 }
 
-fn load_frame(framebuf:Vec<Vec<u16>>, width: u32, height: u32, idx: u32) -> Option<Vec<u8>>{
+fn load_frame(framebuf:&Vec<Vec<u16>>, width: u32, height: u32, idx: u32) -> Option<Vec<u8>>{
     let mut image_data: Vec<u8> = Vec::new();
     let mut buffer: Vec<u8> = vec![0; (width * height * 3) as usize];
-    
+
     for yyy in 0..height {
         for xxx in 0..width {
 
@@ -314,9 +268,12 @@ fn load_frame(framebuf:Vec<Vec<u16>>, width: u32, height: u32, idx: u32) -> Opti
         }
     }
 
-    let encoder: image::codecs::png::PngEncoder<&mut Vec<u8>> = image::codecs::png::PngEncoder::new(&mut image_data);
+    
+    // let encoder = image::codecs::png::PngEncoder::new(&mut image_data); // 120millisec
+    // let encoder = image::codecs::jpeg::JpegEncoder::new(&mut image_data); // 60millisec
+    let encoder = image::codecs::bmp::BmpEncoder::new(&mut image_data); // 5millisec
     let result = encoder.write_image(buffer.as_slice(), width, height, image::ColorType::Rgb8.into());
-
+    
     match result {
         Ok(_) => Some(image_data),
         Err(_) => None,
@@ -414,7 +371,7 @@ pub async fn stream_rgb_image() {
                 rdata: s.cur_r_num,
                 gdata: s.cur_g_num,
                 bdata: s.cur_b_num,
-            }.send_signal_to_dart(draw_image(s.cur_r_num, s.cur_g_num, s.cur_b_num, HEIGHT, WIDTH));
+            }.send_signal_to_dart(draw_image(s.cur_r_num, s.cur_g_num, s.cur_b_num, 256, 256));
 
         }
     });

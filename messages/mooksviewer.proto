@@ -23,12 +23,16 @@ message MessageOpenFile {
 // [RINF:DART-SIGNAL]
 message MessagePlayControl {
   string cmd = 1;
+  double data = 2;
 }
 
 // [RINF:RUST-SIGNAL]
 message MessageRaw {
   uint32 Height = 1;
   uint32 Width = 2;
+  uint32 curidx = 3;
+  uint32 endidx = 4;
+  uint64 fps = 5;
 }
 
 // [RINF:RUST-SIGNAL]

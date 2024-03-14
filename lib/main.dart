@@ -1,5 +1,6 @@
 import 'dart:ffi';
 
+import 'package:provider/provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -10,10 +11,24 @@ import 'package:file_picker/file_picker.dart';
 
 import './messages/mooksviewer.pb.dart';
 import './RGBpage.dart';
+import './themeprovider.dart';
+import './rawimageprovider.dart';
 
 void main() async {
   await initializeRust();
-  runApp(MainApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (context) => ThemeProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => RawImageProvider(),
+        ),
+      ],
+      child: MainApp()
+    )
+  );
 }
 
 class MainApp extends StatelessWidget {
@@ -21,6 +36,8 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
     return MaterialApp(
       title: "jmook",
       initialRoute: '/',
@@ -29,25 +46,42 @@ class MainApp extends StatelessWidget {
         '/home' : (context) => MRawViewer(),
         '/rgb' : (context) => RGBPage(),
       },
+      theme: ThemeData.light(),
+      darkTheme: ThemeData.dark(),
+      themeMode: themeProvider.themeMode,
+
       debugShowCheckedModeBanner: false,
     );
   }
 }
 
 class MRawViewer extends StatelessWidget {
-  const MRawViewer({super.key});
+  MRawViewer({super.key});
+
+  ThemeMode _themeMode = ThemeMode.system;
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Mook's Viewer"),
         actions: <Widget>[
+          Text("Dark Mode "),
+         Switch(
+          value: themeProvider.isDarkMode,
+          inactiveTrackColor: Colors.black38,
+          activeColor: Colors.white38,
+          onChanged: (value) {
+              themeProvider.toggleTheme(value);
+            },
+          ),
           IconButton(
             onPressed:() {
               Navigator.pushNamed(context, '/rgb');
             },
-            icon: const Icon(Icons.palette))
+            icon: const Icon(Icons.palette)),
         ],
       ),
       body: ViewerBody(),
@@ -79,6 +113,8 @@ class _ViewerBodyState extends State<ViewerBody> {
 
   @override
   Widget build(BuildContext context) {
+    final rawImageProvider = Provider.of<RawImageProvider>(context);
+
     return Column(
       children: [
         SizedBox(height: 10,width: 1100,),
@@ -112,25 +148,12 @@ class _ViewerBodyState extends State<ViewerBody> {
                   ),
                 ),
               ),
-              // Flexible(
-              //   fit: FlexFit.tight,
-              //   child: TextField(
-              //     decoration: InputDecoration(
-              //       border: OutlineInputBorder(),
-              //       labelText: mrawpath,
-              //     ),
-              //     onChanged: (value) {
-              //       mrawpath = value;
-              //     },
-              //   ),
-              // ),
-              IconButton(
-                onPressed: () async {
+              ElevatedButton(
+                onPressed:() async {
                   FilePickerResult? result = await FilePicker.platform.pickFiles();
                   if (result != null) {
                     mrawpath = result.files.single.path!;
                   }
-
                   // FilePickerResult? result = await FilePicker.platform.pickFiles();
                   // if (result != null) {
                   //   PlatformFile file = result.files.first;
@@ -142,29 +165,33 @@ class _ViewerBodyState extends State<ViewerBody> {
                   // } else {
                   //   // User canceled the picker
                   // }
+                  MessageOpenFile(
+                    filepath: mrawpath,
+                    height: int.parse(str_height) > 0 ? int.parse(str_height) : 0,
+                    width: int.parse(str_width) > 0 ? int.parse(str_width) : 0,
+                    byte: 0,
+                    head: 0,
+                    tail: 0
+                  ).sendSignalToRust(null);
+
+                  rawImageProvider.height = int.parse(str_height) > 0 ? int.parse(str_height) : 0;
+                  rawImageProvider.width = int.parse(str_width) > 0 ? int.parse(str_width) : 0;
                   setState(() { });
                 },
-                icon: Icon(Icons.file_open)
-              )
+                child: Row( children: [ Icon(Icons.file_open), Text(" Open"), ],
+                )
+              ),
             ],
           ),
         ),
         Text(mrawpath),
-        ElevatedButton(
-          onPressed:() {
-            MessageOpenFile(
-              filepath: mrawpath,
-              height: int.parse(str_height) > 0 ? int.parse(str_height) : 0,
-              width: int.parse(str_width) > 0 ? int.parse(str_width) : 0,
-              byte: 0,
-              head: 0,
-              tail: 0
-            ).sendSignalToRust(null);
-          },
-          child: Text("Open")
+
+        Stack(
+          children: [
+            Center(child: VideoArea()),
+            Center(child: PlayController()),
+          ],
         ),
-        VideoArea(),
-        PlayController(),
       ],
     );
   }
@@ -180,6 +207,9 @@ class VideoArea extends StatefulWidget {
 class _VideoAreaState extends State<VideoArea> {
   @override
   Widget build(BuildContext context) {
+    double silder = 0.0;
+    final rawImageProvider = Provider.of<RawImageProvider>(context);
+
     return StreamBuilder(
       stream: MessageRaw.rustSignalStream,
       builder: (context, snapshot) {
@@ -188,22 +218,33 @@ class _VideoAreaState extends State<VideoArea> {
 
         final imageData = rustSignal.blob!;
         final msg = rustSignal.message;
-        return Container(
-          margin: const EdgeInsets.all(20),
-          width: msg.width.toDouble(),
-          height: msg.height.toDouble(),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(24.0),
-            child: FittedBox(
-              fit: BoxFit.contain,
-              child: Image.memory(
-                imageData,
-                width: msg.width.toDouble(),
-                height: msg.height.toDouble(),
-                gaplessPlayback: true,
+
+        if (msg.width != 0 && msg.height != 0)
+        {
+          rawImageProvider.setImageSize(msg.width.toInt(), msg.height.toInt());
+          rawImageProvider.setIdx(msg.curidx.toInt());
+          rawImageProvider.maxidx = msg.endidx.toInt() - 1;
+        }
+        return Column(
+          children: [
+            Container(
+              margin: const EdgeInsets.all(20),
+              width: msg.width.toDouble(),
+              height: msg.height.toDouble(),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(24.0),
+                child: FittedBox(
+                  fit: BoxFit.contain,
+                  child: Image.memory(
+                    imageData,
+                    width: msg.width.toDouble(),
+                    height: msg.height.toDouble(),
+                    gaplessPlayback: true,
+                  ),
+                ),
               ),
             ),
-          ),
+          ],
         );
       }
     );
@@ -218,39 +259,78 @@ class PlayController extends StatefulWidget {
 }
 
 class _PlayControllerState extends State<PlayController> {
-  @override
-  Widget build(BuildContext con1text) {
-    return Center(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          IconButton(
-            onPressed:() {
-              MessagePlayControl(cmd: 'Play').sendSignalToRust(null);
-            },
-            icon: Icon(Icons.play_arrow)
-          ),
-          IconButton(
-            onPressed:() {
-              MessagePlayControl(cmd: 'Puase').sendSignalToRust(null);
-            },
-            icon: Icon(Icons.pause)
-          ),
-          IconButton(
-            onPressed:() {
-              MessagePlayControl(cmd: 'Stop').sendSignalToRust(null);
-            },
-            icon: Icon(Icons.stop)
-          ),
-          IconButton(
-            onPressed:() {
-              MessagePlayControl(cmd: 'Close').sendSignalToRust(null);
-            },
-            icon: Icon(Icons.close)
-          ),
+  static double controllerSize = 50;
+  static double siderSize = 20;
+  double silderValue = 0;
+  double silderMax = 1;
 
-        ],
-      ),
+  @override
+  Widget build(BuildContext context) {
+    final rawImageProvider = Provider.of<RawImageProvider>(context);
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    silderValue = context.watch<RawImageProvider>().curidx.toDouble();
+    silderMax = context.watch<RawImageProvider>().maxidx.toDouble();
+
+    return Column(
+      children: [
+        SizedBox(height: rawImageProvider.height > (controllerSize + siderSize) ? rawImageProvider.height - (controllerSize + siderSize) : 0,),
+        SizedBox(
+          height: siderSize,
+          width: rawImageProvider.width.toDouble(),
+          child: Slider(
+            value: silderValue,
+            max: silderMax,
+            onChanged: (value) {
+              MessagePlayControl(cmd: 'Jump', data: value).sendSignalToRust(null);
+              setState(() { });
+            },
+          ),
+        ),
+        SizedBox(height: 5),
+        Container(
+          width: 200, height: controllerSize,
+          decoration: BoxDecoration(
+            // color: Colors.transparent,
+            color: themeProvider.isDarkMode ? Color.fromARGB(142, 0, 0, 0) : Color.fromARGB(218, 255, 255, 255),
+            // border: Border.all(color: Colors.white),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              IconButton(
+                onPressed:() {
+                  MessagePlayControl(cmd: 'Play', data: 0).sendSignalToRust(null);
+                },
+                // icon: Icon(color: Colors.white70, Icons.play_arrow,)
+                icon: Icon(Icons.play_arrow,)
+              ),
+              IconButton(
+                onPressed:() {
+                  MessagePlayControl(cmd: 'Pause', data: 0).sendSignalToRust(null);
+                },
+                // icon: Icon(color: Colors.white70, Icons.pause)
+                icon: Icon(Icons.pause)
+              ),
+              IconButton(
+                onPressed:() {
+                  MessagePlayControl(cmd: 'Stop', data: 0).sendSignalToRust(null);
+                },
+                // icon: Icon(color: Colors.white70, Icons.stop)
+                icon: Icon(Icons.stop)
+              ),
+              IconButton(
+                onPressed:() {
+                  MessagePlayControl(cmd: 'Close', data: 0).sendSignalToRust(null);
+                },
+                // icon: Icon(color: Colors.white70, Icons.close)
+                icon: Icon(Icons.close)
+              ),
+        
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

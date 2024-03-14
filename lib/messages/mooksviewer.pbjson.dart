@@ -55,12 +55,14 @@ const MessagePlayControl$json = {
   '1': 'MessagePlayControl',
   '2': [
     {'1': 'cmd', '3': 1, '4': 1, '5': 9, '10': 'cmd'},
+    {'1': 'data', '3': 2, '4': 1, '5': 1, '10': 'data'},
   ],
 };
 
 /// Descriptor for `MessagePlayControl`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List messagePlayControlDescriptor = $convert.base64Decode(
-    'ChJNZXNzYWdlUGxheUNvbnRyb2wSEAoDY21kGAEgASgJUgNjbWQ=');
+    'ChJNZXNzYWdlUGxheUNvbnRyb2wSEAoDY21kGAEgASgJUgNjbWQSEgoEZGF0YRgCIAEoAVIEZG'
+    'F0YQ==');
 
 @$core.Deprecated('Use messageRawDescriptor instead')
 const MessageRaw$json = {
@@ -68,13 +70,17 @@ const MessageRaw$json = {
   '2': [
     {'1': 'Height', '3': 1, '4': 1, '5': 13, '10': 'Height'},
     {'1': 'Width', '3': 2, '4': 1, '5': 13, '10': 'Width'},
+    {'1': 'curidx', '3': 3, '4': 1, '5': 13, '10': 'curidx'},
+    {'1': 'endidx', '3': 4, '4': 1, '5': 13, '10': 'endidx'},
+    {'1': 'fps', '3': 5, '4': 1, '5': 4, '10': 'fps'},
   ],
 };
 
 /// Descriptor for `MessageRaw`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List messageRawDescriptor = $convert.base64Decode(
     'CgpNZXNzYWdlUmF3EhYKBkhlaWdodBgBIAEoDVIGSGVpZ2h0EhQKBVdpZHRoGAIgASgNUgVXaW'
-    'R0aA==');
+    'R0aBIWCgZjdXJpZHgYAyABKA1SBmN1cmlkeBIWCgZlbmRpZHgYBCABKA1SBmVuZGlkeBIQCgNm'
+    'cHMYBSABKARSA2Zwcw==');
 
 @$core.Deprecated('Use outputMessageDescriptor instead')
 const OutputMessage$json = {

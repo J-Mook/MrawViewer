@@ -8,6 +8,7 @@ environment:
 
 dependencies:
   rinf: ^6.6.2
+  provider: ^6.0.1
   file_picker: ^6.2.0
   flutter:
     sdk: flutter

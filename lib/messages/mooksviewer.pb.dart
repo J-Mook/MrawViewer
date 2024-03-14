@@ -17,6 +17,7 @@ import 'package:rinf/rinf.dart';
 
 import 'dart:core' as $core;
 
+import 'package:fixnum/fixnum.dart' as $fixnum;
 import 'package:protobuf/protobuf.dart' as $pb;
 
 /// [RINF:DART-SIGNAL]
@@ -272,10 +273,14 @@ class MessagePlayControl extends $pb.GeneratedMessage {void sendSignalToRust(Uin
 
   factory MessagePlayControl({
     $core.String? cmd,
+    $core.double? data,
   }) {
     final $result = create();
     if (cmd != null) {
       $result.cmd = cmd;
+    }
+    if (data != null) {
+      $result.data = data;
     }
     return $result;
   }
@@ -285,6 +290,7 @@ class MessagePlayControl extends $pb.GeneratedMessage {void sendSignalToRust(Uin
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'MessagePlayControl', package: const $pb.PackageName(_omitMessageNames ? '' : 'mooksviewer'), createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'cmd')
+    ..a<$core.double>(2, _omitFieldNames ? '' : 'data', $pb.PbFieldType.OD)
     ..hasRequiredFields = false
   ;
 
@@ -317,6 +323,15 @@ class MessagePlayControl extends $pb.GeneratedMessage {void sendSignalToRust(Uin
   $core.bool hasCmd() => $_has(0);
   @$pb.TagNumber(1)
   void clearCmd() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.double get data => $_getN(1);
+  @$pb.TagNumber(2)
+  set data($core.double v) { $_setDouble(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasData() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearData() => clearField(2);
 }
 
 /// [RINF:RUST-SIGNAL]
@@ -326,6 +341,9 @@ class MessageRaw extends $pb.GeneratedMessage {static Stream<RustSignal<MessageR
   factory MessageRaw({
     $core.int? height,
     $core.int? width,
+    $core.int? curidx,
+    $core.int? endidx,
+    $fixnum.Int64? fps,
   }) {
     final $result = create();
     if (height != null) {
@@ -333,6 +351,15 @@ class MessageRaw extends $pb.GeneratedMessage {static Stream<RustSignal<MessageR
     }
     if (width != null) {
       $result.width = width;
+    }
+    if (curidx != null) {
+      $result.curidx = curidx;
+    }
+    if (endidx != null) {
+      $result.endidx = endidx;
+    }
+    if (fps != null) {
+      $result.fps = fps;
     }
     return $result;
   }
@@ -343,6 +370,9 @@ class MessageRaw extends $pb.GeneratedMessage {static Stream<RustSignal<MessageR
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'MessageRaw', package: const $pb.PackageName(_omitMessageNames ? '' : 'mooksviewer'), createEmptyInstance: create)
     ..a<$core.int>(1, _omitFieldNames ? '' : 'Height', $pb.PbFieldType.OU3, protoName: 'Height')
     ..a<$core.int>(2, _omitFieldNames ? '' : 'Width', $pb.PbFieldType.OU3, protoName: 'Width')
+    ..a<$core.int>(3, _omitFieldNames ? '' : 'curidx', $pb.PbFieldType.OU3)
+    ..a<$core.int>(4, _omitFieldNames ? '' : 'endidx', $pb.PbFieldType.OU3)
+    ..a<$fixnum.Int64>(5, _omitFieldNames ? '' : 'fps', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
     ..hasRequiredFields = false
   ;
 
@@ -384,6 +414,33 @@ class MessageRaw extends $pb.GeneratedMessage {static Stream<RustSignal<MessageR
   $core.bool hasWidth() => $_has(1);
   @$pb.TagNumber(2)
   void clearWidth() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.int get curidx => $_getIZ(2);
+  @$pb.TagNumber(3)
+  set curidx($core.int v) { $_setUnsignedInt32(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasCuridx() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearCuridx() => clearField(3);
+
+  @$pb.TagNumber(4)
+  $core.int get endidx => $_getIZ(3);
+  @$pb.TagNumber(4)
+  set endidx($core.int v) { $_setUnsignedInt32(3, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasEndidx() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearEndidx() => clearField(4);
+
+  @$pb.TagNumber(5)
+  $fixnum.Int64 get fps => $_getI64(4);
+  @$pb.TagNumber(5)
+  set fps($fixnum.Int64 v) { $_setInt64(4, v); }
+  @$pb.TagNumber(5)
+  $core.bool hasFps() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearFps() => clearField(5);
 }
 
 /// [RINF:RUST-SIGNAL]

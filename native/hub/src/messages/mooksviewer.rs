@@ -50,6 +50,8 @@ pub struct MessageOpenFile {
 pub struct MessagePlayControl {
     #[prost(string, tag="1")]
     pub cmd: ::prost::alloc::string::String,
+    #[prost(double, tag="2")]
+    pub data: f64,
 }
 /// \[RINF:RUST-SIGNAL\]
 #[allow(clippy::derive_partial_eq_without_eq)]
@@ -59,6 +61,12 @@ pub struct MessageRaw {
     pub height: u32,
     #[prost(uint32, tag="2")]
     pub width: u32,
+    #[prost(uint32, tag="3")]
+    pub curidx: u32,
+    #[prost(uint32, tag="4")]
+    pub endidx: u32,
+    #[prost(uint64, tag="5")]
+    pub fps: u64,
 }
 /// \[RINF:RUST-SIGNAL\]
 #[allow(clippy::derive_partial_eq_without_eq)]
