@@ -346,13 +346,6 @@ class _PlayControllerState extends State<PlayController> {
                   },
                   icon: Icon(Icons.stop)
                 ),
-                IconButton(
-                  onPressed:() {
-                    MessagePlayControl(cmd: 'Close', data: 0).sendSignalToRust(null);
-                  },
-                  icon: Icon(Icons.close)
-                ),
-          
               ],
             ),
           ),
