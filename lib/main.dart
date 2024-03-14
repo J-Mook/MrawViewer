@@ -95,6 +95,92 @@ class MRawViewer extends StatelessWidget {
   }
 }
 
+class FileController extends StatelessWidget {
+  FileController({super.key});
+
+  String mrawpath = "";
+  String str_height = "";
+  String str_width = "";
+
+  @override
+  Widget build(BuildContext context) {
+    final rawImageProvider = Provider.of<RawImageProvider>(context);
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: [
+        Flexible(
+          child: Container(
+            constraints: BoxConstraints(maxWidth: 150),
+            child: TextField(
+              textAlignVertical: TextAlignVertical.center,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Width',
+              ),
+              onChanged: (value) { if (value.isNotEmpty){ str_width = value; } },
+            ),
+          ),
+        ),
+        Flexible(
+          child: Container(
+            constraints: BoxConstraints(maxWidth: 150),
+            child: TextField(
+              textAlignVertical: TextAlignVertical.center,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Height',
+              ),
+              onChanged: (value) { if (value.isNotEmpty){ str_height = value; } }
+            ),
+          ),
+        ),
+        Spacer(),
+        ElevatedButton(
+          onPressed:() async {
+            FilePickerResult? result = await FilePicker.platform.pickFiles();
+            if (result != null) {
+              mrawpath = result.files.single.path!;
+            }
+            // FilePickerResult? result = await FilePicker.platform.pickFiles();
+            // if (result != null) {
+            //   PlatformFile file = result.files.first;
+            //   print(file.name);
+            //   print(file.bytes);
+            //   print(file.size);
+            //   print(file.extension);
+            //   print(file.path);
+            // } else {
+            //   // User canceled the picker
+            // }
+            MessageOpenFile(
+              filepath: mrawpath,
+              height: int.parse(str_height) > 0 ? int.parse(str_height) : 0,
+              width: int.parse(str_width) > 0 ? int.parse(str_width) : 0,
+              byte: 0,
+              head: 0,
+              tail: 0
+            ).sendSignalToRust(null);
+
+            rawImageProvider.height = int.parse(str_height) > 0 ? int.parse(str_height) : 0;
+            rawImageProvider.width = int.parse(str_width) > 0 ? int.parse(str_width) : 0;
+            // setState(() { });
+          },
+          child: Row( children: [ Icon(Icons.file_open), Text(" Open"), ],)
+        ),
+        ElevatedButton(
+          onPressed:() {
+            MessagePlayControl(cmd: 'Close', data: 0).sendSignalToRust(null);
+          },
+          child: Row( children: [ Icon(Icons.close), Text(" Close"), ],)
+        ),
+      ],
+    );
+  }
+}
+
 class ViewerBody extends StatefulWidget {
   const ViewerBody({super.key});
 
@@ -119,78 +205,13 @@ class _ViewerBodyState extends State<ViewerBody> {
       children: [
         SizedBox(height: 10,width: 1100,),
         SizedBox(height: 35,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              Flexible(
-                child: Container(
-                  constraints: BoxConstraints(maxWidth: 150),
-                  child: TextField(
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: 'Width',
-                    ),
-                    onChanged: (value) { if (value.isNotEmpty){ str_width = value; } },
-                  ),
-                ),
-              ),
-              Flexible(
-                child: Container(
-                  constraints: BoxConstraints(maxWidth: 150),
-                  child: TextField(
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: 'Height',
-                    ),
-                    onChanged: (value) { if (value.isNotEmpty){ str_height = value; } }
-                  ),
-                ),
-              ),
-              Spacer(),
-              ElevatedButton(
-                onPressed:() async {
-                  FilePickerResult? result = await FilePicker.platform.pickFiles();
-                  if (result != null) {
-                    mrawpath = result.files.single.path!;
-                  }
-                  // FilePickerResult? result = await FilePicker.platform.pickFiles();
-                  // if (result != null) {
-                  //   PlatformFile file = result.files.first;
-                  //   print(file.name);
-                  //   print(file.bytes);
-                  //   print(file.size);
-                  //   print(file.extension);
-                  //   print(file.path);
-                  // } else {
-                  //   // User canceled the picker
-                  // }
-                  MessageOpenFile(
-                    filepath: mrawpath,
-                    height: int.parse(str_height) > 0 ? int.parse(str_height) : 0,
-                    width: int.parse(str_width) > 0 ? int.parse(str_width) : 0,
-                    byte: 0,
-                    head: 0,
-                    tail: 0
-                  ).sendSignalToRust(null);
-
-                  rawImageProvider.height = int.parse(str_height) > 0 ? int.parse(str_height) : 0;
-                  rawImageProvider.width = int.parse(str_width) > 0 ? int.parse(str_width) : 0;
-                  setState(() { });
-                },
-                child: Row( children: [ Icon(Icons.file_open), Text(" Open"), ],
-                )
-              ),
-            ],
-          ),
+          child: FileController()
         ),
-        Text(mrawpath),
-
+        // Text(mrawpath),
         Stack(
           children: [
             Center(child: VideoArea()),
-            context.watch<RawImageProvider>().ishoverImage ? Center(child: PlayController()) : Text(""),
+            Center(child: context.watch<RawImageProvider>().ishoverImage ? PlayController() : Text("")),
           ],
         ),
       ],

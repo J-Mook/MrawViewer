@@ -38,9 +38,6 @@ async fn main() {
 pub async fn stream_mraw_image(){
 
     use messages::mooksviewer::*;
-    use std::io::{self, BufReader, Read};
-    use std::path::Path;
-    use byteorder::{LittleEndian, ReadBytesExt};
 
     #[derive(Clone)]
     struct s_mrawinfo {
@@ -53,14 +50,14 @@ pub async fn stream_mraw_image(){
         framedata: Arc<Vec<Vec<u16>>>
     }
     let a_mrawinfo = Arc::new(Mutex::new(s_mrawinfo {
-        filepath: "".to_string(),
-        height: 0,
-        width: 0,
-        byte: 0,
-        head: 0,
-        tail: 0,
-        framedata: Arc::new(Vec::new()),
-    }));
+            filepath: "".to_string(),
+            height: 0,
+            width: 0,
+            byte: 0,
+            head: 0,
+            tail: 0,
+            framedata: Arc::new(Vec::new()),
+        }));
     
     #[derive(Clone)]
     struct s_playstate {
@@ -70,11 +67,11 @@ pub async fn stream_mraw_image(){
         total_idx: u32,
     }
     let a_playstate = Arc::new(Mutex::new(s_playstate {
-        opened: false,
-        play: false,
-        current_idx: 0,
-        total_idx: 0,
-    }));
+            opened: false,
+            play: false,
+            current_idx: 0,
+            total_idx: 0,
+        }));
     
     let a_playstate2 = Arc::clone(&a_playstate);
     let a_mrawinfo2 = Arc::clone(&a_mrawinfo);
@@ -96,6 +93,11 @@ pub async fn stream_mraw_image(){
             info.byte = msg.byte;
             info.head = msg.head;
             info.tail = msg.tail;
+
+            state.opened = false;
+            state.play = false;
+            state.current_idx = 0;
+            state.total_idx = 0;
             
             if let Some(data) = load_image_file(info.filepath.clone(), info.height, info.width) {
                 state.total_idx = data.len() as u32;
