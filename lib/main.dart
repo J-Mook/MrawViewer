@@ -206,7 +206,6 @@ class VideoArea extends StatefulWidget {
 }
 
 class _VideoAreaState extends State<VideoArea> {
-  int silder = 0;
 
   @override
   Widget build(BuildContext pcontext) {
@@ -219,11 +218,11 @@ class _VideoAreaState extends State<VideoArea> {
         builder: (context, snapshot) {
           final rustSignal = snapshot.data;
           if (rustSignal == null) {
-            pcontext.read<RawImageProvider>().setImageSize(256, 256);
+            pcontext.read<RawImageProvider>().setImageSize(640, 480);
             return Container(
               margin: const EdgeInsets.all(20),
-              width: 256,
-              height: 256,
+              width: 640,
+              height: 480,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(24.0),
                 color: Colors.black,
