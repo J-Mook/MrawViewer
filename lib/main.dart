@@ -148,6 +148,7 @@ class _ViewerBodyState extends State<ViewerBody> {
                   ),
                 ),
               ),
+              Spacer(),
               ElevatedButton(
                 onPressed:() async {
                   FilePickerResult? result = await FilePicker.platform.pickFiles();
@@ -189,7 +190,7 @@ class _ViewerBodyState extends State<ViewerBody> {
         Stack(
           children: [
             Center(child: VideoArea()),
-            Center(child: PlayController()),
+            context.watch<RawImageProvider>().ishoverImage ? Center(child: PlayController()) : Text(""),
           ],
         ),
       ],
@@ -205,48 +206,57 @@ class VideoArea extends StatefulWidget {
 }
 
 class _VideoAreaState extends State<VideoArea> {
+  int silder = 0;
+
   @override
-  Widget build(BuildContext context) {
-    double silder = 0.0;
-    final rawImageProvider = Provider.of<RawImageProvider>(context);
-
-    return StreamBuilder(
-      stream: MessageRaw.rustSignalStream,
-      builder: (context, snapshot) {
-        final rustSignal = snapshot.data;
-        if (rustSignal == null) { return Text("Nothing received yet"); }
-
-        final imageData = rustSignal.blob!;
-        final msg = rustSignal.message;
-
-        if (msg.width != 0 && msg.height != 0)
-        {
-          rawImageProvider.setImageSize(msg.width.toInt(), msg.height.toInt());
-          rawImageProvider.setIdx(msg.curidx.toInt());
-          rawImageProvider.maxidx = msg.endidx.toInt() - 1;
-        }
-        return Column(
-          children: [
-            Container(
+  Widget build(BuildContext pcontext) {
+    // final rawImageProvider = Provider.of<RawImageProvider>(pcontext);
+    return MouseRegion(
+      onEnter: (event) { pcontext.read<RawImageProvider>().setHover(true); },
+      onExit: (event) { pcontext.read<RawImageProvider>().setHover(false); },
+      child: StreamBuilder(
+        stream: MessageRaw.rustSignalStream,
+        builder: (context, snapshot) {
+          final rustSignal = snapshot.data;
+          if (rustSignal == null) {
+            pcontext.read<RawImageProvider>().setImageSize(256, 256);
+            return Container(
               margin: const EdgeInsets.all(20),
-              width: msg.width.toDouble(),
-              height: msg.height.toDouble(),
-              child: ClipRRect(
+              width: 256,
+              height: 256,
+              decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(24.0),
-                child: FittedBox(
-                  fit: BoxFit.contain,
-                  child: Image.memory(
-                    imageData,
-                    width: msg.width.toDouble(),
-                    height: msg.height.toDouble(),
-                    gaplessPlayback: true,
-                  ),
+                color: Colors.black,
+              ),
+            );
+          }
+      
+          final imageData = rustSignal.blob!;
+          final msg = rustSignal.message;
+          pcontext.read<RawImageProvider>().setImageSize(msg.width.toInt(), msg.height.toInt());
+          pcontext.read<RawImageProvider>().setIdx(msg.curidx.toInt());
+          pcontext.read<RawImageProvider>().maxidx = msg.endidx.toInt() - 1;
+
+          return Container(
+            margin: const EdgeInsets.fromLTRB(20, 20, 20, 7),
+            width: msg.width.toDouble(),
+            height: msg.height.toDouble(),
+            
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(24.0),
+              child: FittedBox(
+                fit: BoxFit.contain,
+                child: Image.memory(
+                  imageData,
+                  width: msg.width.toDouble(),
+                  height: msg.height.toDouble(),
+                  gaplessPlayback: true,
                 ),
               ),
             ),
-          ],
-        );
-      }
+          );
+        }
+      ),
     );
   }
 }
@@ -266,71 +276,68 @@ class _PlayControllerState extends State<PlayController> {
 
   @override
   Widget build(BuildContext context) {
-    final rawImageProvider = Provider.of<RawImageProvider>(context);
     final themeProvider = Provider.of<ThemeProvider>(context);
-    silderValue = context.watch<RawImageProvider>().curidx.toDouble();
+    final rawImageProvider = Provider.of<RawImageProvider>(context);
     silderMax = context.watch<RawImageProvider>().maxidx.toDouble();
 
-    return Column(
-      children: [
-        SizedBox(height: rawImageProvider.height > (controllerSize + siderSize) ? rawImageProvider.height - (controllerSize + siderSize) : 0,),
-        SizedBox(
-          height: siderSize,
-          width: rawImageProvider.width.toDouble(),
-          child: Slider(
-            value: silderValue,
-            max: silderMax,
-            onChanged: (value) {
-              MessagePlayControl(cmd: 'Jump', data: value).sendSignalToRust(null);
-              setState(() { });
-            },
+    return MouseRegion(
+      onEnter: (event) { context.read<RawImageProvider>().setHover(true); },
+      onExit: (event) { context.read<RawImageProvider>().setHover(false); },
+      child: Column(
+        children: [
+          SizedBox(height: rawImageProvider.height > (controllerSize + siderSize) ? rawImageProvider.height - (controllerSize + siderSize) : 0,),
+          SizedBox(
+            height: siderSize,
+            width: rawImageProvider.width.toDouble(),
+            child: Slider(
+              value: context.watch<RawImageProvider>().curidx.toDouble(),
+              max: silderMax,
+              onChanged: (value) {
+                MessagePlayControl(cmd: 'Jump', data: value).sendSignalToRust(null);
+                setState(() { });
+              },
+            ),
           ),
-        ),
-        SizedBox(height: 5),
-        Container(
-          width: 200, height: controllerSize,
-          decoration: BoxDecoration(
-            // color: Colors.transparent,
-            color: themeProvider.isDarkMode ? Color.fromARGB(142, 0, 0, 0) : Color.fromARGB(218, 255, 255, 255),
-            // border: Border.all(color: Colors.white),
-            borderRadius: BorderRadius.circular(10),
+          SizedBox(height: 5),
+          Container(
+            width: 200, height: controllerSize,
+            decoration: BoxDecoration(
+              color: themeProvider.isDarkMode ? Color.fromARGB(142, 0, 0, 0) : Color.fromARGB(218, 255, 255, 255),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                IconButton(
+                  onPressed:() {
+                    MessagePlayControl(cmd: 'Play', data: 0).sendSignalToRust(null);
+                  },
+                  icon: Icon(Icons.play_arrow,)
+                ),
+                IconButton(
+                  onPressed:() {
+                    MessagePlayControl(cmd: 'Pause', data: 0).sendSignalToRust(null);
+                  },
+                  icon: Icon(Icons.pause)
+                ),
+                IconButton(
+                  onPressed:() {
+                    MessagePlayControl(cmd: 'Stop', data: 0).sendSignalToRust(null);
+                  },
+                  icon: Icon(Icons.stop)
+                ),
+                IconButton(
+                  onPressed:() {
+                    MessagePlayControl(cmd: 'Close', data: 0).sendSignalToRust(null);
+                  },
+                  icon: Icon(Icons.close)
+                ),
+          
+              ],
+            ),
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              IconButton(
-                onPressed:() {
-                  MessagePlayControl(cmd: 'Play', data: 0).sendSignalToRust(null);
-                },
-                // icon: Icon(color: Colors.white70, Icons.play_arrow,)
-                icon: Icon(Icons.play_arrow,)
-              ),
-              IconButton(
-                onPressed:() {
-                  MessagePlayControl(cmd: 'Pause', data: 0).sendSignalToRust(null);
-                },
-                // icon: Icon(color: Colors.white70, Icons.pause)
-                icon: Icon(Icons.pause)
-              ),
-              IconButton(
-                onPressed:() {
-                  MessagePlayControl(cmd: 'Stop', data: 0).sendSignalToRust(null);
-                },
-                // icon: Icon(color: Colors.white70, Icons.stop)
-                icon: Icon(Icons.stop)
-              ),
-              IconButton(
-                onPressed:() {
-                  MessagePlayControl(cmd: 'Close', data: 0).sendSignalToRust(null);
-                },
-                // icon: Icon(color: Colors.white70, Icons.close)
-                icon: Icon(Icons.close)
-              ),
-        
-            ],
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
