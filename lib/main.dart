@@ -1,30 +1,58 @@
 import 'dart:ffi';
+import 'dart:io';
 
 import 'package:provider/provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:rinf/rinf.dart';
-import './messages/generated.dart';
-
 import 'package:file_picker/file_picker.dart';
+import 'package:window_manager/window_manager.dart';
+import 'package:desktop_drop/desktop_drop.dart';
 
+
+import './messages/generated.dart';
 import './messages/mooksviewer.pb.dart';
+
 import './RGBpage.dart';
 import './themeprovider.dart';
 import './rawimageprovider.dart';
 
 void main() async {
   await initializeRust();
+
+  WidgetsFlutterBinding.ensureInitialized();
+  // await WindowManager.instance.ensureInitialized();
+  // windowManager.waitUntilReadyToShow().then((_) async {
+  //   await windowManager.setTitleBarStyle(
+  //     TitleBarStyle.hidden,
+  //     windowButtonVisibility: false,
+  //   );
+  //   // await windowManager.setMinimumSize(const Size(500, 600));
+  //   await windowManager.show();
+  //   await windowManager.focus();
+  //   await windowManager.setPreventClose(true);
+  //   await windowManager.setSkipTaskbar(false);
+  // });
+
+  await windowManager.ensureInitialized();
+  WindowOptions windowOptions = WindowOptions(
+    // size: Size(800, 600),
+    center: true,
+    backgroundColor: Colors.transparent,
+    skipTaskbar: false,
+    titleBarStyle: TitleBarStyle.hidden,
+  );
+  windowManager.waitUntilReadyToShow(windowOptions, () async {
+    await windowManager.show();
+    await windowManager.focus();
+  });
+
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(
-          create: (context) => ThemeProvider(),
-        ),
-        ChangeNotifierProvider(
-          create: (context) => RawImageProvider(),
-        ),
+        ChangeNotifierProvider( create: (context) => ThemeProvider(), ),
+        ChangeNotifierProvider( create: (context) => RawImageProvider(), ),
       ],
       child: MainApp()
     )
@@ -66,14 +94,19 @@ class MRawViewer extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Mook's Viewer"),
+        title: const Text("             Mook's Viewer", style: TextStyle(fontSize: 15),),
+        toolbarHeight: 35.0,
+        // leading: IconButton(
+        //     onPressed:() => exit(0),
+        //     icon: const Icon(Icons.close)
+        //   ),
         actions: <Widget>[
           Text("Dark Mode "),
-         Switch(
-          value: themeProvider.isDarkMode,
-          inactiveTrackColor: Colors.black38,
-          activeColor: Colors.white38,
-          onChanged: (value) {
+          Switch(
+            value: themeProvider.isDarkMode,
+            inactiveTrackColor: Colors.black38,
+            activeColor: Colors.white38,
+            onChanged: (value) {
               themeProvider.toggleTheme(value);
             },
           ),
@@ -81,7 +114,8 @@ class MRawViewer extends StatelessWidget {
             onPressed:() {
               Navigator.pushNamed(context, '/rgb');
             },
-            icon: const Icon(Icons.palette)),
+            icon: const Icon(Icons.palette)
+          ),
         ],
       ),
       body: ViewerBody(),
