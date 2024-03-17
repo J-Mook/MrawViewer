@@ -9,4 +9,12 @@ class ThemeProvider with ChangeNotifier {
     themeMode = isOn ? ThemeMode.dark : ThemeMode.light;
     notifyListeners();
   }
+
+  bool sidebarextended = false;
+  void toggleSidebar(bool isOn) {
+    if (sidebarextended =! isOn)
+      notifyListeners();
+    sidebarextended = isOn;
+  }
+
 }
