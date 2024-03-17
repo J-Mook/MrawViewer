@@ -138,6 +138,20 @@ pub async fn stream_mraw_image(){
             if _cmd == "Jump" {
                 state.current_idx = msg.data as u32;
             }
+            if _cmd == "Inc" {
+                if (state.current_idx >= state.total_idx){
+                    state.current_idx = 0;
+                } else {
+                    state.current_idx += 1;
+                }
+            }
+            if _cmd == "Dec" {
+                if (state.current_idx == 0){
+                    state.current_idx = state.total_idx.clone();
+                } else {
+                    state.current_idx -= 1;
+                }
+            }
             if _cmd == "Close" {
                 info.filepath = "".to_string();
                 info.height = 0;

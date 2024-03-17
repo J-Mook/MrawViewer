@@ -184,6 +184,7 @@ class _PlayControllerState extends State<PlayController> {
   static double controllerSize = 50;
   static double siderSize = 20;
   double _idx = 0;
+  int _fps = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -204,7 +205,7 @@ class _PlayControllerState extends State<PlayController> {
               builder: (context, snapshot) {
               final rustSignal = snapshot.data;
                 if (rustSignal == null) { _idx = 0; }
-                else{ _idx = rustSignal.message.curidx.toDouble(); }
+                else{ _idx = rustSignal.message.curidx.toDouble(); _fps = rustSignal.message.fps.toInt();}
                 return Slider(
                   value: _idx,
                   max: context.watch<RawImageProvider>().maxidx.toDouble(),
@@ -225,27 +226,52 @@ class _PlayControllerState extends State<PlayController> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                // IconButton(
+                //   onPressed:() {
+                //     MessagePlayControl(cmd: 'Stop', data: 0).sendSignalToRust(null);
+                //   },
+                //   icon: Icon(Icons.stop)
+                // ),
+                IconButton(
+                  onPressed:() {
+                    MessagePlayControl(cmd: 'Dec', data: 0).sendSignalToRust(null);
+                  },
+                  icon: Icon(Icons.keyboard_arrow_left)
+                ),
+                !context.watch<RawImageProvider>().isPlay ?
                 IconButton(
                   onPressed:() {
                     MessagePlayControl(cmd: 'Play', data: 0).sendSignalToRust(null);
+                    context.read<RawImageProvider>().setPlay(true);
                   },
                   icon: Icon(Icons.play_arrow,)
-                ),
+                ) :
                 IconButton(
                   onPressed:() {
                     MessagePlayControl(cmd: 'Pause', data: 0).sendSignalToRust(null);
+                    context.read<RawImageProvider>().setPlay(false);
                   },
                   icon: Icon(Icons.pause)
                 ),
                 IconButton(
                   onPressed:() {
-                    MessagePlayControl(cmd: 'Stop', data: 0).sendSignalToRust(null);
+                    MessagePlayControl(cmd: 'Inc', data: 0).sendSignalToRust(null);
                   },
-                  icon: Icon(Icons.stop)
+                  icon: Icon(Icons.keyboard_arrow_right)
                 ),
+                
               ],
             ),
           ),
+          // StreamBuilder(
+          //   stream: MessageRaw.rustSignalStream,
+          //   builder: (context, snapshot) {
+          //   final rustSignal = snapshot.data;
+          //     if (rustSignal == null) { _fps = 0; }
+          //     else{ _fps = rustSignal.message.fps.toInt();}
+          //     return Text("$_fps ms", textAlign: TextAlign.end,);
+          //   }
+          // ),
         ],
       ),
     );

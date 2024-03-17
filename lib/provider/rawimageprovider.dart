@@ -6,6 +6,12 @@ class RawImageProvider with ChangeNotifier {
   int curidx = 0;
   int maxidx = 1;
   bool ishoverImage = true;
+  bool isPlay = false;
+
+  void setPlay(state){
+    isPlay = state;
+    notifyListeners();
+  }
 
   void setHover(bool bbb){
     if(ishoverImage != bbb){
