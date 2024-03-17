@@ -120,7 +120,8 @@ class _VideoAreaState extends State<VideoArea> {
 
   @override
   Widget build(BuildContext pcontext) {
-    // final rawImageProvider = Provider.of<RawImageProvider>(pcontext);
+    final rawImageProvider = Provider.of<RawImageProvider>(pcontext);
+
     return MouseRegion(
       onEnter: (event) { pcontext.read<RawImageProvider>().setHover(true); },
       onExit: (event) { pcontext.read<RawImageProvider>().setHover(false); },
@@ -129,7 +130,7 @@ class _VideoAreaState extends State<VideoArea> {
         builder: (context, snapshot) {
           final rustSignal = snapshot.data;
           if (rustSignal == null) {
-            pcontext.read<RawImageProvider>().setImageSize(640, 480);
+            context.read<RawImageProvider>().setImageSize(640, 480);
             return Container(
               margin: const EdgeInsets.all(20),
               width: 640,
@@ -143,9 +144,10 @@ class _VideoAreaState extends State<VideoArea> {
       
           final imageData = rustSignal.blob!;
           final msg = rustSignal.message;
-          pcontext.read<RawImageProvider>().setImageSize(msg.width.toInt(), msg.height.toInt());
-          pcontext.read<RawImageProvider>().setIdx(msg.curidx.toInt());
-          pcontext.read<RawImageProvider>().maxidx = msg.endidx.toInt() - 1;
+          context.read<RawImageProvider>().setImageSize(msg.width.toInt(), msg.height.toInt());
+          context.read<RawImageProvider>().curidx = msg.curidx.toInt();
+          // rawImageProvider.setIdx(msg.curidx.toInt());
+          context.read<RawImageProvider>().maxidx = msg.endidx.toInt() - 1;
 
           return Container(
             margin: const EdgeInsets.fromLTRB(20, 20, 20, 7),
@@ -181,14 +183,12 @@ class PlayController extends StatefulWidget {
 class _PlayControllerState extends State<PlayController> {
   static double controllerSize = 50;
   static double siderSize = 20;
-  double silderValue = 0;
-  double silderMax = 1;
+  double _idx = 0;
 
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
     final rawImageProvider = Provider.of<RawImageProvider>(context);
-    silderMax = context.watch<RawImageProvider>().maxidx.toDouble();
 
     return MouseRegion(
       onEnter: (event) { context.read<RawImageProvider>().setHover(true); },
@@ -199,13 +199,20 @@ class _PlayControllerState extends State<PlayController> {
           SizedBox(
             height: siderSize,
             width: rawImageProvider.width.toDouble(),
-            child: Slider(
-              value: context.watch<RawImageProvider>().curidx.toDouble(),
-              max: silderMax,
-              onChanged: (value) {
-                MessagePlayControl(cmd: 'Jump', data: value).sendSignalToRust(null);
-                setState(() { });
-              },
+            child: StreamBuilder(
+              stream: MessageRaw.rustSignalStream,
+              builder: (context, snapshot) {
+              final rustSignal = snapshot.data;
+                if (rustSignal == null) { _idx = 0; }
+                else{ _idx = rustSignal.message.curidx.toDouble(); }
+                return Slider(
+                  value: _idx,
+                  max: context.watch<RawImageProvider>().maxidx.toDouble(),
+                  onChanged: (value) {
+                    MessagePlayControl(cmd: 'Jump', data: value).sendSignalToRust(null);
+                  },
+                );
+              }
             ),
           ),
           SizedBox(height: 5),

@@ -8,17 +8,17 @@ class RawImageProvider with ChangeNotifier {
   bool ishoverImage = true;
 
   void setHover(bool bbb){
-    // if(ishoverImage != bbb){
-    //   ishoverImage = bbb;
-    //   notifyListeners();
-    // }
+    if(ishoverImage != bbb){
+      notifyListeners();
+    }
     ishoverImage = bbb;
-    notifyListeners();
+    // notifyListeners();
   }
 
   void setIdx(int idx){
+    // if(curidx != idx)
+    //   notifyListeners();
     curidx = idx;
-    // notifyListeners();
   }
 
   void setImageSize(int wid, int hit) {

@@ -241,8 +241,7 @@ fn make_test_pattern(width: u32, height: u32) -> Option<Vec<Vec<u16>>>{
     for vvv in 0..256 {
         for yyy in 0..height {
             for xxx in 0..width {
-                let mut pix = vvv;
-                pix = (256 * xxx / width + vvv) % 256;
+                let pix = (256 * xxx / width + vvv) % 256;
                 image_data[vvv as usize][((width * yyy + xxx)) as usize] = (pix * 64) as u16;
             }
         }
