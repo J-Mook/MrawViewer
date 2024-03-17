@@ -63,8 +63,8 @@ pub async fn stream_mraw_image(){
     struct s_playstate {
         opened: bool,
         play: bool,
-        current_idx: u32,
-        total_idx: u32,
+        current_idx: i32,
+        total_idx: i32,
     }
     let a_playstate = Arc::new(Mutex::new(s_playstate {
             opened: false,
@@ -100,7 +100,7 @@ pub async fn stream_mraw_image(){
             state.total_idx = 0;
             
             if let Some(data) = load_image_file(info.filepath.clone(), info.height, info.width) {
-                state.total_idx = data.len() as u32;
+                state.total_idx = data.len() as i32;
                 info.framedata = Arc::new(data);
                 state.opened = true;
             } else {
@@ -136,21 +136,15 @@ pub async fn stream_mraw_image(){
                 state.play = false;
             }
             if _cmd == "Jump" {
-                state.current_idx = msg.data as u32;
+                state.current_idx = msg.data as i32;
             }
             if _cmd == "Inc" {
-                if (state.current_idx >= state.total_idx){
-                    state.current_idx = 0;
-                } else {
-                    state.current_idx += 1;
-                }
+                state.current_idx += 1;
+                if (state.current_idx >= state.total_idx - 1){ state.current_idx = 0; }
             }
             if _cmd == "Dec" {
-                if (state.current_idx == 0){
-                    state.current_idx = state.total_idx.clone();
-                } else {
-                    state.current_idx -= 1;
-                }
+                state.current_idx -= 1;
+                if (state.current_idx <= 0){  state.current_idx = state.total_idx.clone() - 1; }
             }
             if _cmd == "Close" {
                 info.filepath = "".to_string();
@@ -263,7 +257,7 @@ fn make_test_pattern(width: u32, height: u32) -> Option<Vec<Vec<u16>>>{
     return Some(image_data);
 }
 
-fn load_frame(framebuf:&Vec<Vec<u16>>, width: u32, height: u32, idx: u32) -> Option<Vec<u8>>{
+fn load_frame(framebuf:&Vec<Vec<u16>>, width: u32, height: u32, idx: i32) -> Option<Vec<u8>>{
     let mut image_data: Vec<u8> = Vec::new();
     let mut buffer: Vec<u8> = vec![0; (width * height * 3) as usize];
 

@@ -70,8 +70,8 @@ const MessageRaw$json = {
   '2': [
     {'1': 'Height', '3': 1, '4': 1, '5': 13, '10': 'Height'},
     {'1': 'Width', '3': 2, '4': 1, '5': 13, '10': 'Width'},
-    {'1': 'curidx', '3': 3, '4': 1, '5': 13, '10': 'curidx'},
-    {'1': 'endidx', '3': 4, '4': 1, '5': 13, '10': 'endidx'},
+    {'1': 'curidx', '3': 3, '4': 1, '5': 5, '10': 'curidx'},
+    {'1': 'endidx', '3': 4, '4': 1, '5': 5, '10': 'endidx'},
     {'1': 'fps', '3': 5, '4': 1, '5': 4, '10': 'fps'},
   ],
 };
@@ -79,7 +79,7 @@ const MessageRaw$json = {
 /// Descriptor for `MessageRaw`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List messageRawDescriptor = $convert.base64Decode(
     'CgpNZXNzYWdlUmF3EhYKBkhlaWdodBgBIAEoDVIGSGVpZ2h0EhQKBVdpZHRoGAIgASgNUgVXaW'
-    'R0aBIWCgZjdXJpZHgYAyABKA1SBmN1cmlkeBIWCgZlbmRpZHgYBCABKA1SBmVuZGlkeBIQCgNm'
+    'R0aBIWCgZjdXJpZHgYAyABKAVSBmN1cmlkeBIWCgZlbmRpZHgYBCABKAVSBmVuZGlkeBIQCgNm'
     'cHMYBSABKARSA2Zwcw==');
 
 @$core.Deprecated('Use outputMessageDescriptor instead')

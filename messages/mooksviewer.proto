@@ -30,8 +30,8 @@ message MessagePlayControl {
 message MessageRaw {
   uint32 Height = 1;
   uint32 Width = 2;
-  uint32 curidx = 3;
-  uint32 endidx = 4;
+  int32 curidx = 3;
+  int32 endidx = 4;
   uint64 fps = 5;
 }
 

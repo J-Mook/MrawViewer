@@ -370,8 +370,8 @@ class MessageRaw extends $pb.GeneratedMessage {static Stream<RustSignal<MessageR
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'MessageRaw', package: const $pb.PackageName(_omitMessageNames ? '' : 'mooksviewer'), createEmptyInstance: create)
     ..a<$core.int>(1, _omitFieldNames ? '' : 'Height', $pb.PbFieldType.OU3, protoName: 'Height')
     ..a<$core.int>(2, _omitFieldNames ? '' : 'Width', $pb.PbFieldType.OU3, protoName: 'Width')
-    ..a<$core.int>(3, _omitFieldNames ? '' : 'curidx', $pb.PbFieldType.OU3)
-    ..a<$core.int>(4, _omitFieldNames ? '' : 'endidx', $pb.PbFieldType.OU3)
+    ..a<$core.int>(3, _omitFieldNames ? '' : 'curidx', $pb.PbFieldType.O3)
+    ..a<$core.int>(4, _omitFieldNames ? '' : 'endidx', $pb.PbFieldType.O3)
     ..a<$fixnum.Int64>(5, _omitFieldNames ? '' : 'fps', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
     ..hasRequiredFields = false
   ;
@@ -418,7 +418,7 @@ class MessageRaw extends $pb.GeneratedMessage {static Stream<RustSignal<MessageR
   @$pb.TagNumber(3)
   $core.int get curidx => $_getIZ(2);
   @$pb.TagNumber(3)
-  set curidx($core.int v) { $_setUnsignedInt32(2, v); }
+  set curidx($core.int v) { $_setSignedInt32(2, v); }
   @$pb.TagNumber(3)
   $core.bool hasCuridx() => $_has(2);
   @$pb.TagNumber(3)
@@ -427,7 +427,7 @@ class MessageRaw extends $pb.GeneratedMessage {static Stream<RustSignal<MessageR
   @$pb.TagNumber(4)
   $core.int get endidx => $_getIZ(3);
   @$pb.TagNumber(4)
-  set endidx($core.int v) { $_setUnsignedInt32(3, v); }
+  set endidx($core.int v) { $_setSignedInt32(3, v); }
   @$pb.TagNumber(4)
   $core.bool hasEndidx() => $_has(3);
   @$pb.TagNumber(4)

@@ -61,10 +61,10 @@ pub struct MessageRaw {
     pub height: u32,
     #[prost(uint32, tag="2")]
     pub width: u32,
-    #[prost(uint32, tag="3")]
-    pub curidx: u32,
-    #[prost(uint32, tag="4")]
-    pub endidx: u32,
+    #[prost(int32, tag="3")]
+    pub curidx: i32,
+    #[prost(int32, tag="4")]
+    pub endidx: i32,
     #[prost(uint64, tag="5")]
     pub fps: u64,
 }
