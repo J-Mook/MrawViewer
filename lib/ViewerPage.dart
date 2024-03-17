@@ -89,6 +89,7 @@ class _ViewerBodyState extends State<ViewerBody> {
                   rawImageProvider.height = int.parse(str_height) > 0 ? int.parse(str_height) : 0;
                   rawImageProvider.width = int.parse(str_width) > 0 ? int.parse(str_width) : 0;
                   opened = true;
+                  context.read<RawImageProvider>().setFileName(mrawpath);
                   // setState(() { });
                 },
                 child: Row( children: [ Icon(Icons.file_open), Text(" Open"), ], )
@@ -226,6 +227,7 @@ class _PlayControllerState extends State<PlayController> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                Text(context.watch<RawImageProvider>().filepath),
                 // IconButton(
                 //   onPressed:() {
                 //     MessagePlayControl(cmd: 'Stop', data: 0).sendSignalToRust(null);
