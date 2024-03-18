@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:rinf/rinf.dart';
@@ -19,87 +20,25 @@ class _RGBPageState extends State<RGBPage> {
   double _gsilder_value = 0.0;
   double _bsilder_value = 0.0;
 
+  List<Widget> _colorList = [ ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+      // appBar: AppBar(),
       body: Center(
         child: Column(
           children: [
-            Divider(thickness: 2,),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                OutlinedButton(
-                    onPressed: () async {
-                      InputMessage(
-                        cmd: "Reset",
-                        intData: 0,
-                      ).sendSignalToRust(null);
-                    },
-                    child: Text("Reset")),
-                OutlinedButton(
-                  onPressed: () async {
-                    InputMessage(
-                      cmd: "+",
-                      intData: 0,
-                    ).sendSignalToRust(null);
-                  },
-                  child: Icon(Icons.add),
+            SizedBox(height: 50.0,
+              child: Expanded(
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: _colorList.length,
+                  itemBuilder:(context, index) => _colorList[index],
                 ),
-                TextButton(
-                  onPressed: () {
-                    InputMessage(
-                      cmd: "-",
-                      intData: 0,
-                    ).sendSignalToRust(null);
-                  },
-                  child: Container(child: Icon(Icons.remove)),
-                ),
-              ],
+              ),
             ),
-            Slider(
-              value: _rsilder_value,
-              max: 256,
-              onChanged:(value) {
-                _rsilder_value = value;
-                setState(() { });
-                InputMessage(
-                  cmd: "SetRGB",
-                  intRData: _rsilder_value.toInt(),
-                  intGData: _gsilder_value.toInt(),
-                  intBData: _bsilder_value.toInt(),
-                ).sendSignalToRust(null);
-              },
-            ),
-            Slider(
-              value: _gsilder_value,
-              max: 256,
-              onChanged:(value) {
-                _gsilder_value = value;
-                setState(() { });
-                InputMessage(
-                  cmd: "SetRGB",
-                  intRData: _rsilder_value.toInt(),
-                  intGData: _gsilder_value.toInt(),
-                  intBData: _bsilder_value.toInt(),
-                ).sendSignalToRust(null);
-              },
-            ),
-            Slider(
-              value: _bsilder_value,
-              max: 256,
-              onChanged:(value) {
-                _bsilder_value = value;
-                setState(() { });
-                InputMessage(
-                  cmd: "SetRGB",
-                  intRData: _rsilder_value.toInt(),
-                  intGData: _gsilder_value.toInt(),
-                  intBData: _bsilder_value.toInt(),
-                ).sendSignalToRust(null);
-              },
-            ),
+            
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -121,19 +60,6 @@ class _RGBPageState extends State<RGBPage> {
                     child: Icon(Icons.pause)),
               ],
             ),
-            Divider(thickness: 2,),
-            StreamBuilder(
-                stream: OutputMessage.rustSignalStream,
-                builder: (context, snapshot) {
-                  final rustSignal = snapshot.data;
-                  if (rustSignal == null) {
-                    return Text("Nothing received yet");
-                  }
-
-                  final msg = rustSignal.message;
-                  final nums = msg.currentNumber;
-                  return Text(nums.toString());
-                }),
             StreamBuilder(
               stream: OutputImage.rustSignalStream,
               builder: (context, snapshot) {
@@ -149,7 +75,105 @@ class _RGBPageState extends State<RGBPage> {
                 _bsilder_value = msg.bdata.toDouble();
                 return Column(
                   children: [
-                    Text("r:$_rsilder_value  g:$_gsilder_value  b:$_bsilder_value"),
+                    Divider(thickness: 2,),
+                    // Row(
+                    //   mainAxisAlignment: MainAxisAlignment.center,
+                    //   children: [
+                    //     OutlinedButton(
+                    //         onPressed: () async {
+                    //           InputMessage(
+                    //             cmd: "Reset",
+                    //             intData: 0,
+                    //           ).sendSignalToRust(null);
+                    //         },
+                    //         child: Text("Reset")),
+                    //     OutlinedButton(
+                    //       onPressed: () async {
+                    //         InputMessage(
+                    //           cmd: "+",
+                    //           intData: 0,
+                    //         ).sendSignalToRust(null);
+                    //       },
+                    //       child: Icon(Icons.add),
+                    //     ),
+                    //     TextButton(
+                    //       onPressed: () {
+                    //         InputMessage(
+                    //           cmd: "-",
+                    //           intData: 0,
+                    //         ).sendSignalToRust(null);
+                    //       },
+                    //       child: Container(child: Icon(Icons.remove)),
+                    //     ),
+                    //   ],
+                    // ),
+                    Slider(
+                      value: _rsilder_value,
+                      max: 256,
+                      onChanged:(value) {
+                        _rsilder_value = value;
+                        setState(() { });
+                        InputMessage(
+                          cmd: "SetRGB",
+                          intRData: _rsilder_value.toInt(),
+                          intGData: _gsilder_value.toInt(),
+                          intBData: _bsilder_value.toInt(),
+                        ).sendSignalToRust(null);
+                      },
+                    ),
+                    Slider(
+                      value: _gsilder_value,
+                      max: 256,
+                      onChanged:(value) {
+                        _gsilder_value = value;
+                        setState(() { });
+                        InputMessage(
+                          cmd: "SetRGB",
+                          intRData: _rsilder_value.toInt(),
+                          intGData: _gsilder_value.toInt(),
+                          intBData: _bsilder_value.toInt(),
+                        ).sendSignalToRust(null);
+                      },
+                    ),
+                    Slider(
+                      value: _bsilder_value,
+                      max: 256,
+                      onChanged:(value) {
+                        _bsilder_value = value;
+                        setState(() { });
+                        InputMessage(
+                          cmd: "SetRGB",
+                          intRData: _rsilder_value.toInt(),
+                          intGData: _gsilder_value.toInt(),
+                          intBData: _bsilder_value.toInt(),
+                        ).sendSignalToRust(null);
+                      },
+                    ),
+                    Divider(thickness: 2,),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text("\t r:$_rsilder_value  g:$_gsilder_value  b:$_bsilder_value"),
+                        IconButton(
+                          onPressed:() {
+                            _colorList.insert(0,
+                              FittedBox(
+                                fit: BoxFit.fill,
+                                child: Container(width: 20, height: 20,
+                                  margin: EdgeInsets.all(2),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.all(Radius.circular(3)),
+                                    color: Color.fromARGB(255, _rsilder_value.toInt(), _gsilder_value.toInt(), _bsilder_value.toInt()),
+                                  ),
+                                ),
+                              )
+                            );
+                            setState(() { });
+                          },
+                          icon: Icon(Icons.add_box)
+                        ),
+                      ],
+                    ),
                     Container(
                       margin: const EdgeInsets.all(20),
                       width: 256,
@@ -171,7 +195,6 @@ class _RGBPageState extends State<RGBPage> {
                 );
               }
             ),
-            Divider(thickness: 2,),
           ],
         ),
       ),
