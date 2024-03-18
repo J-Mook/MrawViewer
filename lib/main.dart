@@ -203,7 +203,7 @@ class _MainBody extends State<MainBody> {
                     ),
                   ),
                 ],
-              ) : Icon(Icons.dark_mode);
+              ) : IconButton(icon: Icon(Icons.dark_mode), onPressed:() => themeProvider.toggleTheme(!themeProvider.isDarkMode),);
             },
           ),
         ),

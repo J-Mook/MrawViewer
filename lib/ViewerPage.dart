@@ -77,6 +77,7 @@ class _ViewerBodyState extends State<ViewerBody> {
                   FilePickerResult? result = await FilePicker.platform.pickFiles();
                   if (result != null) { mrawpath = result.files.single.path!; }
 
+                  MessagePlayControl(cmd: 'Close', data: 0).sendSignalToRust(null);
                   MessageOpenFile(
                     filepath: mrawpath,
                     height: int.parse(str_height) > 0 ? int.parse(str_height) : 0,
