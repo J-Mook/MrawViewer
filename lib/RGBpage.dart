@@ -20,7 +20,7 @@ class _RGBPageState extends State<RGBPage> {
   double _gsilder_value = 0.0;
   double _bsilder_value = 0.0;
 
-  List<Widget> _colorList = [ ];
+  List<Widget> _colorList = [];
 
   @override
   Widget build(BuildContext context) {
@@ -29,19 +29,18 @@ class _RGBPageState extends State<RGBPage> {
       body: Center(
         child: Column(
           children: [
-            SizedBox(height: 50.0,
-              child: Expanded(
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: _colorList.length,
-                  itemBuilder:(context, index) => _colorList[index],
-                ),
+            Expanded(
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: _colorList.length,
+                itemBuilder:(context, index) => _colorList[index],
               ),
             ),
             
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                
                 OutlinedButton(
                     onPressed: () async {
                       InputMessage(
@@ -76,37 +75,6 @@ class _RGBPageState extends State<RGBPage> {
                 return Column(
                   children: [
                     Divider(thickness: 2,),
-                    // Row(
-                    //   mainAxisAlignment: MainAxisAlignment.center,
-                    //   children: [
-                    //     OutlinedButton(
-                    //         onPressed: () async {
-                    //           InputMessage(
-                    //             cmd: "Reset",
-                    //             intData: 0,
-                    //           ).sendSignalToRust(null);
-                    //         },
-                    //         child: Text("Reset")),
-                    //     OutlinedButton(
-                    //       onPressed: () async {
-                    //         InputMessage(
-                    //           cmd: "+",
-                    //           intData: 0,
-                    //         ).sendSignalToRust(null);
-                    //       },
-                    //       child: Icon(Icons.add),
-                    //     ),
-                    //     TextButton(
-                    //       onPressed: () {
-                    //         InputMessage(
-                    //           cmd: "-",
-                    //           intData: 0,
-                    //         ).sendSignalToRust(null);
-                    //       },
-                    //       child: Container(child: Icon(Icons.remove)),
-                    //     ),
-                    //   ],
-                    // ),
                     Slider(
                       value: _rsilder_value,
                       max: 256,
@@ -150,30 +118,7 @@ class _RGBPageState extends State<RGBPage> {
                       },
                     ),
                     Divider(thickness: 2,),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text("\t r:$_rsilder_value  g:$_gsilder_value  b:$_bsilder_value"),
-                        IconButton(
-                          onPressed:() {
-                            _colorList.insert(0,
-                              FittedBox(
-                                fit: BoxFit.fill,
-                                child: Container(width: 20, height: 20,
-                                  margin: EdgeInsets.all(2),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.all(Radius.circular(3)),
-                                    color: Color.fromARGB(255, _rsilder_value.toInt(), _gsilder_value.toInt(), _bsilder_value.toInt()),
-                                  ),
-                                ),
-                              )
-                            );
-                            setState(() { });
-                          },
-                          icon: Icon(Icons.add_box)
-                        ),
-                      ],
-                    ),
+                    Text("r:$_rsilder_value  g:$_gsilder_value  b:$_bsilder_value"),
                     Container(
                       margin: const EdgeInsets.all(20),
                       width: 256,
@@ -182,11 +127,34 @@ class _RGBPageState extends State<RGBPage> {
                         borderRadius: BorderRadius.circular(24.0),
                         child: FittedBox(
                           fit: BoxFit.contain,
-                          child: Image.memory(
-                            imageData,
-                            width: 256,
-                            height: 256,
-                            gaplessPlayback: true,
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children:[
+                              Image.memory(
+                                imageData,
+                                width: 256,
+                                height: 256,
+                                gaplessPlayback: true,
+                              ),
+                              IconButton(
+                                onPressed:() {
+                                  _colorList.insert(0,
+                                    FittedBox(
+                                      fit: BoxFit.fill,
+                                      child: Container(width: 20, height: 20,
+                                        margin: EdgeInsets.all(2),
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.all(Radius.circular(3)),
+                                          color: Color.fromARGB(255, _rsilder_value.toInt(), _gsilder_value.toInt(), _bsilder_value.toInt()),
+                                        ),
+                                      ),
+                                    )
+                                  );
+                                  setState(() { });
+                                },
+                                icon: Icon(Icons.add_box)
+                              ),
+                            ] 
                           ),
                         ),
                       ),
