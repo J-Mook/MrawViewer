@@ -70,7 +70,7 @@ pub async fn stream_mraw_image(){
             opened: false,
             play: false,
             current_idx: 0,
-            total_idx: 0,
+            total_idx: 1,
         }));
     
     let a_playstate2 = Arc::clone(&a_playstate);
@@ -158,7 +158,7 @@ pub async fn stream_mraw_image(){
                 state.opened = false;
                 state.play = false;
                 state.current_idx = 0;
-                state.total_idx = 0;
+                state.total_idx = 1;
             }
             println!("recv cmd : {}", _cmd);
         }
