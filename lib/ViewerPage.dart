@@ -98,7 +98,7 @@ class _ViewerBodyState extends State<ViewerBody> {
           ),
         ),
         Divider(),
-        Text(mrawpath),
+        // Text(mrawpath),
         Stack(
           children: [
             Center(child: VideoArea()),
@@ -197,7 +197,8 @@ class _PlayControllerState extends State<PlayController> {
       onExit: (event) { context.read<RawImageProvider>().setHover(false); },
       child: Column(
         children: [
-          SizedBox(height: rawImageProvider.height > (controllerSize + siderSize) ? rawImageProvider.height - (controllerSize + siderSize) : 0,),
+          Text(context.watch<RawImageProvider>().filepath),
+          SizedBox(height: rawImageProvider.height > (controllerSize + siderSize + 20) ? rawImageProvider.height - (controllerSize + siderSize + 20) : 0,),
           SizedBox(
             height: siderSize,
             width: rawImageProvider.width.toDouble(),
@@ -227,7 +228,6 @@ class _PlayControllerState extends State<PlayController> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(context.watch<RawImageProvider>().filepath),
                 // IconButton(
                 //   onPressed:() {
                 //     MessagePlayControl(cmd: 'Stop', data: 0).sendSignalToRust(null);
