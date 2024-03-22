@@ -21,15 +21,16 @@ void main() async {
   // WidgetsFlutterBinding.ensureInitialized();
   // await WindowManager.instance.ensureInitialized();
   // windowManager.waitUntilReadyToShow().then((_) async {
-  //   await windowManager.setTitleBarStyle(
-  //     TitleBarStyle.hidden,
-  //     windowButtonVisibility: false,
-  //   );
+  //   // await windowManager.setTitleBarStyle(
+  //   //   TitleBarStyle.hidden,
+  //   //   windowButtonVisibility: false,
+  //   // );
   //   // await windowManager.setMinimumSize(const Size(500, 600));
   //   await windowManager.show();
   //   await windowManager.focus();
   //   await windowManager.setPreventClose(true);
   //   await windowManager.setSkipTaskbar(false);
+  //   await windowManager.setAsFrameless();
   // });
   // await windowManager.ensureInitialized();
 

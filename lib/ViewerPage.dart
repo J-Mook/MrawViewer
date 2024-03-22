@@ -95,6 +95,13 @@ class _ViewerBodyState extends State<ViewerBody> {
                 },
                 child: Row( children: [ Icon(Icons.file_open), Text(" Open"), ], )
               ),
+              ElevatedButton(
+                onPressed:() {
+                  MessagePlayControl(cmd: 'Encoding', data: 0).sendSignalToRust(null);
+                  setState(() { });
+                },
+                child: Row( children: [ Icon(Icons.mp), Text(" mp4"), ], )
+              )
             ],
           ),
         ),
