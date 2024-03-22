@@ -13,6 +13,97 @@ import 'provider/rawimageprovider.dart';
 
 
 
+
+
+class dropPage extends StatefulWidget {
+  const dropPage({super.key});
+
+  @override
+  State<dropPage> createState() => _dropPageState();
+}
+
+class _dropPageState extends State<dropPage> {
+
+  String showFileName = "";
+
+  bool _dragging = false;
+
+  Color uploadingColor = Colors.blue[100]!;
+  Color defaultColor = Colors.grey[400]!;
+
+  Container makeDropZone(){
+    Color color = _dragging ? uploadingColor : defaultColor;
+    return Container(
+      height: 500,
+      width: 600,
+      decoration: BoxDecoration(
+        border: Border.all(width: 5, color: color,),
+        borderRadius: const BorderRadius.all(Radius.circular(20)),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text("Drop Your ", style: TextStyle(color: color, fontSize: 20,),),
+              Text(".mraw File", style: TextStyle(fontWeight: FontWeight.bold, color: color, fontSize: 20,),),
+              Icon(Icons.insert_drive_file_rounded, color: color,),
+              Text(" Here", style: TextStyle(color: color, fontSize: 20,),),
+            ],
+          ),
+          Text("(*.mraw)", style: TextStyle(color: color,),),
+          const SizedBox(height: 10,),
+          Text(showFileName, style: TextStyle(color: defaultColor,),),
+        ],
+      ),
+    );
+  }
+
+  Widget build(BuildContext context) {
+    final rawImageProvider = Provider.of<RawImageProvider>(context);
+
+    return DropTarget(
+      onDragDone: (detail) async {
+        debugPrint('onDragDone:');
+        if( detail != null && detail.files.isNotEmpty ){
+          String fileName = detail.files.first.name;
+          debugPrint(fileName);
+          setState(() { showFileName = "Now File Name: $fileName"; });
+          
+          MessagePlayControl(cmd: 'Close', data: 0).sendSignalToRust(null);
+          MessageOpenFile(
+            filepath: detail.files.first.path,
+            height: rawImageProvider.height,
+            width: rawImageProvider.width,
+            byte: 0,
+            head: 0,
+            tail: 0
+          ).sendSignalToRust(null);
+
+          rawImageProvider.isOpned = true;
+          context.read<RawImageProvider>().setFileName(detail.files.first.path);
+        }
+      },
+      onDragEntered: (detail) {
+        setState(() {
+          debugPrint('onDragEntered:');
+          _dragging = true;
+        });
+      },
+      onDragExited: (detail) {
+        debugPrint('onDragExited:');
+        setState(() {
+          _dragging = false;
+        });
+      },
+      child: _dragging ? makeDropZone() : ViewerBody(),
+    );
+  }
+}
+
+
 class ViewerBody extends StatefulWidget {
   const ViewerBody({super.key});
 
@@ -23,13 +114,17 @@ class ViewerBody extends StatefulWidget {
 class _ViewerBodyState extends State<ViewerBody> {
 
   String mrawpath = "";
-  String str_height = "";
-  String str_width = "";
   bool opened = false;
+  final TextEditingController _controller_wid = TextEditingController();
+  final TextEditingController _controller_hit = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     final rawImageProvider = Provider.of<RawImageProvider>(context);
+    if(_controller_wid.text.isEmpty)
+      _controller_wid.text = rawImageProvider.width.toString();
+    if(_controller_hit.text.isEmpty)
+      _controller_hit.text = rawImageProvider.height.toString();
 
     return Column(
       children: [
@@ -42,12 +137,13 @@ class _ViewerBodyState extends State<ViewerBody> {
                 child: Container(
                   constraints: BoxConstraints(maxWidth: 150),
                   child: TextField(
+                    controller: _controller_wid,
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(),
                       labelText: 'Width',
                     ),
-                    onChanged: (value) { if (value.isNotEmpty){ str_width = value; } },
+                    onChanged: (value) { if (value.isNotEmpty){ rawImageProvider.width = int.parse(value) > 0 ? int.parse(value) : 0; } },
                   ),
                 ),
               ),
@@ -55,20 +151,21 @@ class _ViewerBodyState extends State<ViewerBody> {
                 child: Container(
                   constraints: BoxConstraints(maxWidth: 150),
                   child: TextField(
+                    controller: _controller_hit,
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(),
                       labelText: 'Height',
                     ),
-                    onChanged: (value) { if (value.isNotEmpty){ str_height = value; }}
+                    onChanged: (value) { if (value.isNotEmpty){ rawImageProvider.height = int.parse(value) > 0 ? int.parse(value) : 0; }}
                   ),
                 ),
               ),
               Spacer(),
-              opened ? ElevatedButton(
+              rawImageProvider.isOpned ? ElevatedButton(
                 onPressed:() {
                   MessagePlayControl(cmd: 'Close', data: 0).sendSignalToRust(null);
-                  opened = false;
+                  rawImageProvider.isOpned = false;
                   setState(() { });
                 },
                 child: Row( children: [ Icon(Icons.close), Text(" Close"), ], )
@@ -80,16 +177,14 @@ class _ViewerBodyState extends State<ViewerBody> {
                   MessagePlayControl(cmd: 'Close', data: 0).sendSignalToRust(null);
                   MessageOpenFile(
                     filepath: mrawpath,
-                    height: int.parse(str_height) > 0 ? int.parse(str_height) : 0,
-                    width: int.parse(str_width) > 0 ? int.parse(str_width) : 0,
+                    height: rawImageProvider.height,
+                    width: rawImageProvider.width,
                     byte: 0,
                     head: 0,
                     tail: 0
                   ).sendSignalToRust(null);
 
-                  rawImageProvider.height = int.parse(str_height) > 0 ? int.parse(str_height) : 0;
-                  rawImageProvider.width = int.parse(str_width) > 0 ? int.parse(str_width) : 0;
-                  opened = true;
+                  rawImageProvider.isOpned = true;
                   context.read<RawImageProvider>().setFileName(mrawpath);
                   // setState(() { });
                 },
@@ -139,7 +234,7 @@ class _VideoAreaState extends State<VideoArea> {
         builder: (context, snapshot) {
           final rustSignal = snapshot.data;
           if (rustSignal == null) {
-            context.read<RawImageProvider>().setImageSize(640, 480);
+            // context.read<RawImageProvider>().setImageSize(640, 480);
             return Container(
               margin: const EdgeInsets.all(20),
               width: 640,

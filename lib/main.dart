@@ -15,6 +15,9 @@ import './ViewerPage.dart';
 import 'provider/themeprovider.dart';
 import 'provider/rawimageprovider.dart';
 
+
+import 'package:desktop_drop/desktop_drop.dart';
+
 void main() async {
   await initializeRust();
 
@@ -71,6 +74,7 @@ class MainApp extends StatelessWidget {
         '/' : (context) => MRawViewer(),
         '/home' : (context) => MRawViewer(),
         '/rgb' : (context) => RGBPage(),
+        '/drop' : (context) => dropPage(),
       },
       theme: ThemeData.light(),
       darkTheme: ThemeData.dark(),
@@ -162,6 +166,7 @@ class _MainBody extends State<MainBody> {
             items: const [
               SidebarXItem(icon: Icons.home, label: ' Home'),
               SidebarXItem(icon: Icons.palette, label: ' RGBpalette'),
+              SidebarXItem(icon: Icons.file_open, label: ' file drop'),
             ],
             theme: SidebarXTheme(
               width: 60,
@@ -210,12 +215,14 @@ class _MainBody extends State<MainBody> {
             builder:(context, child) {
               switch (_controller.selectedIndex) {
                 case 0:
-                  return ViewerBody();
+                  return dropPage();
                 case 1:
                   return RGBPage();
+                case 2:
+                  return dropPage();
                 
                 default:
-                  return ViewerBody();
+                  return dropPage();
               }
             },
           )

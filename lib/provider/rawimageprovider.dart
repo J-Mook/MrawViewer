@@ -7,6 +7,7 @@ class RawImageProvider with ChangeNotifier {
   int maxidx = 1;
   bool ishoverImage = true;
   bool isPlay = false;
+  bool isOpned = false;
   String filepath = "";
 
   void setFileName(path){
