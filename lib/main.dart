@@ -21,21 +21,21 @@ import 'package:desktop_drop/desktop_drop.dart';
 void main() async {
   await initializeRust();
 
-  // WidgetsFlutterBinding.ensureInitialized();
-  // await WindowManager.instance.ensureInitialized();
-  // windowManager.waitUntilReadyToShow().then((_) async {
-  //   // await windowManager.setTitleBarStyle(
-  //   //   TitleBarStyle.hidden,
-  //   //   windowButtonVisibility: false,
-  //   // );
-  //   // await windowManager.setMinimumSize(const Size(500, 600));
-  //   await windowManager.show();
-  //   await windowManager.focus();
-  //   await windowManager.setPreventClose(true);
-  //   await windowManager.setSkipTaskbar(false);
-  //   await windowManager.setAsFrameless();
-  // });
-  // await windowManager.ensureInitialized();
+  WidgetsFlutterBinding.ensureInitialized();
+  await WindowManager.instance.ensureInitialized();
+  windowManager.waitUntilReadyToShow().then((_) async {
+    // await windowManager.setTitleBarStyle(
+    //   TitleBarStyle.hidden,
+    //   windowButtonVisibility: false,
+    // );
+    // await windowManager.setMinimumSize(const Size(500, 600));
+    await windowManager.show();
+    await windowManager.focus();
+    await windowManager.setPreventClose(true);
+    await windowManager.setSkipTaskbar(false);
+    await windowManager.setAsFrameless();
+  });
+  await windowManager.ensureInitialized();
 
   // WindowOptions windowOptions = WindowOptions(
   //   // size: Size(800, 600),
@@ -125,6 +125,10 @@ class MRawViewer extends StatelessWidget {
           //   },
           //   icon: const Icon(Icons.palette)
           // ),
+          DragToMoveArea(
+            child: SizedBox(width: 100, height: 40,
+            )
+          ),
           IconButton(
             onPressed:() => exit(0),
             icon: Icon(Icons.close, color: themeProvider.isDarkMode ? Colors.white : Colors.black,),
