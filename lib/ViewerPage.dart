@@ -12,7 +12,26 @@ import 'provider/themeprovider.dart';
 import 'provider/rawimageprovider.dart';
 
 
+class analysePage extends StatefulWidget {
+  const analysePage({super.key});
 
+  @override
+  State<analysePage> createState() => _analysePageState();
+}
+
+class _analysePageState extends State<analysePage> {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Stack(
+        children: [
+          Center(child: VideoArea()),
+          // context.watch<RawImageProvider>().ishoverImage ? Center(child: PlayController()) : Text(""),
+        ],
+      ),
+    );
+  }
+}
 
 
 class dropPage extends StatefulWidget {
@@ -36,6 +55,7 @@ class _dropPageState extends State<dropPage> {
     return Container(
       height: 500,
       width: 600,
+      margin: EdgeInsets.fromLTRB(10, 20, 20, 20),
       decoration: BoxDecoration(
         border: Border.all(width: 5, color: color,),
         borderRadius: const BorderRadius.all(Radius.circular(20)),

@@ -166,7 +166,7 @@ class _MainBody extends State<MainBody> {
             items: const [
               SidebarXItem(icon: Icons.home, label: ' Home'),
               SidebarXItem(icon: Icons.palette, label: ' RGBpalette'),
-              SidebarXItem(icon: Icons.file_open, label: ' file drop'),
+              SidebarXItem(icon: Icons.analytics, label: ' Analyse'),
             ],
             theme: SidebarXTheme(
               width: 60,
@@ -219,7 +219,7 @@ class _MainBody extends State<MainBody> {
                 case 1:
                   return RGBPage();
                 case 2:
-                  return dropPage();
+                  return analysePage();
                 
                 default:
                   return dropPage();
