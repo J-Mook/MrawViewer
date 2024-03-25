@@ -34,14 +34,14 @@ class _analysePageState extends State<analysePage> {
 }
 
 
-class dropPage extends StatefulWidget {
-  const dropPage({super.key});
+class DropPage extends StatefulWidget {
+  const DropPage({super.key});
 
   @override
-  State<dropPage> createState() => _dropPageState();
+  State<DropPage> createState() => _DropPageState();
 }
 
-class _dropPageState extends State<dropPage> {
+class _DropPageState extends State<DropPage> {
 
   String showFileName = "";
 

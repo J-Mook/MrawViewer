@@ -34,6 +34,7 @@ void main() async {
     await windowManager.setPreventClose(true);
     await windowManager.setSkipTaskbar(false);
     await windowManager.setAsFrameless();
+    await windowManager.setResizable(true);
   });
   await windowManager.ensureInitialized();
 
@@ -74,7 +75,7 @@ class MainApp extends StatelessWidget {
         '/' : (context) => MRawViewer(),
         '/home' : (context) => MRawViewer(),
         '/rgb' : (context) => RGBPage(),
-        '/drop' : (context) => dropPage(),
+        '/drop' : (context) => DropPage(),
       },
       theme: ThemeData.light(),
       darkTheme: ThemeData.dark(),
@@ -126,8 +127,9 @@ class MRawViewer extends StatelessWidget {
           //   icon: const Icon(Icons.palette)
           // ),
           DragToMoveArea(
-            child: SizedBox(width: 100, height: 40,
-            )
+            child: SizedBox(width: 40, height: 40,
+              child: Icon(Icons.control_camera, color: themeProvider.isDarkMode ? Colors.white : Colors.black,)
+            ),
           ),
           IconButton(
             onPressed:() => exit(0),
@@ -219,14 +221,14 @@ class _MainBody extends State<MainBody> {
             builder:(context, child) {
               switch (_controller.selectedIndex) {
                 case 0:
-                  return dropPage();
+                  return DropPage();
                 case 1:
                   return RGBPage();
                 case 2:
                   return analysePage();
                 
                 default:
-                  return dropPage();
+                  return DropPage();
               }
             },
           )
