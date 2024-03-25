@@ -20,26 +20,12 @@ void main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
   await WindowManager.instance.ensureInitialized();
-  // windowManager.waitUntilReadyToShow().then((_) async {
-  //   // await windowManager.setTitleBarStyle(
-  //   //   TitleBarStyle.hidden,
-  //   //   windowButtonVisibility: false,
-  //   // );
-  //   // await windowManager.setMinimumSize(const Size(500, 600));
-  //   await windowManager.show();
-  //   await windowManager.focus();
-  //   await windowManager.setPreventClose(true);
-  //   await windowManager.setSkipTaskbar(false);
-  //   await windowManager.setAsFrameless();
-  //   await windowManager.setResizable(true);
-  // });
-  // await windowManager.ensureInitialized();
-
   WindowOptions windowOptions = WindowOptions(
     // size: Size(800, 600),
     center: true,
     backgroundColor: Colors.transparent,
     titleBarStyle: TitleBarStyle.hidden,
+    windowButtonVisibility: false,
   );
   windowManager.waitUntilReadyToShow(windowOptions, () async {
     await windowManager.show();
@@ -140,10 +126,8 @@ class MRawViewer extends StatelessWidget {
       ),
       body: MainBody(),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // setState(() { Navigator.pushNamed(context, '/RandColor'); });
-        },
-        child: const Icon(Icons.link),
+        onPressed: () { },
+        child: const Icon(Icons.home),
       ),
     );
   }
