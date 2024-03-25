@@ -10,6 +10,7 @@ import './messages/generated.dart';
 
 import './RGBpage.dart';
 import './ViewerPage.dart';
+import './Analyse.dart';
 import 'provider/themeprovider.dart';
 import 'provider/rawimageprovider.dart';
 
