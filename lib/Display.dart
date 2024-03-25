@@ -7,8 +7,6 @@ import 'provider/themeprovider.dart';
 import 'provider/rawimageprovider.dart';
 
 
-import 'package:flutter/cupertino.dart';
-
 class DisaplyArea extends StatefulWidget {
   const DisaplyArea({super.key});
 
