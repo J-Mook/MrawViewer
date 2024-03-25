@@ -1,9 +1,7 @@
 import 'dart:io';
 
 import 'package:provider/provider.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:sidebarx/sidebarx.dart';
 import 'package:simple_icons/simple_icons.dart';
@@ -15,40 +13,39 @@ import './ViewerPage.dart';
 import 'provider/themeprovider.dart';
 import 'provider/rawimageprovider.dart';
 
-
-import 'package:desktop_drop/desktop_drop.dart';
+import './messages/mooksviewer.pb.dart';
 
 void main() async {
   await initializeRust();
 
   WidgetsFlutterBinding.ensureInitialized();
   await WindowManager.instance.ensureInitialized();
-  windowManager.waitUntilReadyToShow().then((_) async {
-    // await windowManager.setTitleBarStyle(
-    //   TitleBarStyle.hidden,
-    //   windowButtonVisibility: false,
-    // );
-    // await windowManager.setMinimumSize(const Size(500, 600));
+  // windowManager.waitUntilReadyToShow().then((_) async {
+  //   // await windowManager.setTitleBarStyle(
+  //   //   TitleBarStyle.hidden,
+  //   //   windowButtonVisibility: false,
+  //   // );
+  //   // await windowManager.setMinimumSize(const Size(500, 600));
+  //   await windowManager.show();
+  //   await windowManager.focus();
+  //   await windowManager.setPreventClose(true);
+  //   await windowManager.setSkipTaskbar(false);
+  //   await windowManager.setAsFrameless();
+  //   await windowManager.setResizable(true);
+  // });
+  // await windowManager.ensureInitialized();
+
+  WindowOptions windowOptions = WindowOptions(
+    // size: Size(800, 600),
+    center: true,
+    backgroundColor: Colors.transparent,
+    titleBarStyle: TitleBarStyle.hidden,
+  );
+  windowManager.waitUntilReadyToShow(windowOptions, () async {
     await windowManager.show();
     await windowManager.focus();
     await windowManager.setPreventClose(true);
-    await windowManager.setSkipTaskbar(false);
-    await windowManager.setAsFrameless();
-    await windowManager.setResizable(true);
   });
-  await windowManager.ensureInitialized();
-
-  // WindowOptions windowOptions = WindowOptions(
-  //   // size: Size(800, 600),
-  //   center: true,
-  //   backgroundColor: Colors.transparent,
-  //   skipTaskbar: true,
-  //   titleBarStyle: TitleBarStyle.hidden,
-  // );
-  // windowManager.waitUntilReadyToShow(windowOptions, () async {
-  //   await windowManager.show();
-  //   await windowManager.focus();
-  // });
 
   runApp(
     MultiProvider(
@@ -106,7 +103,7 @@ class MRawViewer extends StatelessWidget {
         // backgroundColor: themeProvider.isDarkMode ? Color.fromARGB(64, 255, 255, 255) : Color.fromARGB(164, 0, 0, 0),
         // foregroundColor: themeProvider.isDarkMode ? Color.fromARGB(64, 255, 255, 255) : Color.fromARGB(164, 0, 0, 0),
         leading: IconButton(
-            onPressed:() => exit(0),
+            onPressed:() => Navigator.of(context).pop(true),
             icon: Icon(SimpleIcons.flutter, color: themeProvider.isDarkMode ? Colors.white : Colors.black,),
             iconSize: 15,
           ),
@@ -132,7 +129,10 @@ class MRawViewer extends StatelessWidget {
             ),
           ),
           IconButton(
-            onPressed:() => exit(0),
+            onPressed:() {
+              MessagePlayControl(cmd: 'Exit', data: 0).sendSignalToRust(null);
+              exit(0);
+            },
             icon: Icon(Icons.close, color: themeProvider.isDarkMode ? Colors.white : Colors.black,),
             iconSize: 15,
           ),
@@ -170,7 +170,7 @@ class _MainBody extends State<MainBody> {
           child: SidebarX(
             controller: _controller,
             items: const [
-              SidebarXItem(icon: Icons.home, label: ' Home'),
+              SidebarXItem(icon: Icons.monitor, label: ' Home'),
               SidebarXItem(icon: Icons.palette, label: ' RGBpalette'),
               SidebarXItem(icon: Icons.analytics, label: ' Analyse'),
             ],
