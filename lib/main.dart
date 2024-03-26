@@ -81,7 +81,15 @@ class MRawViewer extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Mook's Viewer", style: TextStyle(fontSize: 15, color: themeProvider.isDarkMode ? Colors.white : Colors.black),),
+        title: DragToMoveArea(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Text("Mook's Viewer", style: TextStyle(fontSize: 15, color: themeProvider.isDarkMode ? Colors.white : Colors.black),),
+              Expanded(child: Text(""),)
+            ],
+          ),
+        ),
         toolbarHeight: 30.0,
         // backgroundColor: Color.fromARGB(255, 127, 127, 127),
         // foregroundColor: Color.fromARGB(255, 127, 127, 127),
@@ -110,11 +118,6 @@ class MRawViewer extends StatelessWidget {
           //   },
           //   icon: const Icon(Icons.palette)
           // ),
-          DragToMoveArea(
-            child: SizedBox(width: 40, height: 40,
-              child: Icon(Icons.control_camera, color: themeProvider.isDarkMode ? Colors.white : Colors.black,)
-            ),
-          ),
           IconButton(
             onPressed:() {
               MessagePlayControl(cmd: 'Exit', data: 0).sendSignalToRust(null);

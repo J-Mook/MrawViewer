@@ -9,8 +9,8 @@ import './messages/mooksviewer.pb.dart';
 import 'provider/themeprovider.dart';
 import 'provider/rawimageprovider.dart';
 
-import 'package:syncfusion_flutter_charts/charts.dart';
-import 'package:syncfusion_flutter_charts/sparkcharts.dart';
+// import 'package:syncfusion_flutter_charts/charts.dart';
+// import 'package:syncfusion_flutter_charts/sparkcharts.dart';
 import 'dart:typed_data';
 
 class analysePage extends StatefulWidget {
